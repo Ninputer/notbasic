@@ -1,0 +1,4 @@
+﻿
+Class TypeName
+
+End Class

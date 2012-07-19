@@ -1,0 +1,4 @@
+﻿
+Class ReferenceIdentifier
+
+End Class

@@ -1,9 +1,14 @@
 # Build and Release Folders
-bin-debug/
-bin-release/
+TestResults/
+bin/
+obj/
+NotBasic.UnitTests/obj
+NotBasic.UnitTests/bin
+NotBasic.Console/obj
+NotBasic.Console/bin
+NotBasic/obj
+NotBasic/bin
 
 # Project property files
-.actionScriptProperties
-.flexProperties
-.settings/
-.project
+*.suo
+*.user
