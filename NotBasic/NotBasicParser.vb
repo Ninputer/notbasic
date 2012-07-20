@@ -26,6 +26,7 @@ Public Class NotBasicParser
     Private SingleKeyword As Token
     Private DoubleKeyword As Token
     Private IfKeyword As Token
+    Private ThenKeyword As Token
     Private ElseKeyword As Token
     Private ElseIfKeyword As Token
     Private EndKeyword As Token
@@ -292,6 +293,7 @@ Public Class NotBasicParser
             SingleKeyword = .DefineToken(Literal("single"))
             DoubleKeyword = .DefineToken(Literal("double"))
             IfKeyword = .DefineToken(Literal("if"))
+            ThenKeyword = .DefineToken(Literal("then"))
             ElseKeyword = .DefineToken(Literal("else"))
             ElseIfKeyword = .DefineToken(Literal("elseif"))
             EndKeyword = .DefineToken(Literal("end"))
@@ -357,10 +359,16 @@ Public Class NotBasicParser
 
     Private Statements As New ParserReference(Of IEnumerable(Of Statement))
     Private Statement As New ParserReference(Of Statement)
-    Private ReturnStatement As New ParserReference(Of Statement)
-    Private AssignmentStatement As New ParserReference(Of Statement)
+    Private SingleLineStatement As New ParserReference(Of Statement)
+    Private BlockStatement As New ParserReference(Of Statement)
+
+    Private ReturnStatement As New ParserReference(Of ReturnStatement)
+    Private AssignmentStatement As New ParserReference(Of AssignmentStatement)
     Private ExpressionStatement As New ParserReference(Of Statement)
     Private CallStatement As New ParserReference(Of Statement)
+    Private IfThenStatement As New ParserReference(Of IfThenStatement)
+    Private IfBlockStatement As New ParserReference(Of IfBlockStatement)
+    Private DoStatement As New ParserReference(Of DoLoopStatement)
 
     Private Expression As New ParserReference(Of Expression)
 
@@ -373,7 +381,7 @@ Public Class NotBasicParser
         Dim LC = LineTerminator.Optional()
 
         'Statement terminator
-        Dim ST = StatementTerminator
+        Dim ST = StatementTerminator.Many1()
 
         DeclaringIdentifier.Reference =
             (From id In Identifier
@@ -397,18 +405,18 @@ Public Class NotBasicParser
             From paramlist In ParameterList
             From _nl2 In LC
             From _rpth In RightPth
-            From _st In ST.Many1()
+            From _st In ST
             Select New FunctionDeclaration(keyword.Span, name, paramlist)
 
         FunctionDefinition.Reference =
             From decl In FunctionDeclaration
             From statements In statements
             From endfun In EndKeyword
-            From _st In ST.Many1()
+            From _st In ST
             Select New FunctionDefinition(decl, statements, endfun.Span)
 
         Program.Reference =
-            From _emptylines In LineTerminator.Many
+            From _emptylines In StatementTerminator.Many
             From functions In FunctionDefinition.Many()
             Select New CompilationUnit(functions)
 
@@ -436,14 +444,119 @@ Public Class NotBasicParser
             Statement.Many()
 
         Statement.Reference =
-            ReturnStatement
+            SingleLineStatement.SuffixedBy(ST) Or
+            BlockStatement
+
+        SingleLineStatement.Reference =
+            ReturnStatement.TryCast(Of Statement)() Or
+            AssignmentStatement.TryCast(Of Statement)() Or
+            IfThenStatement.TryCast(Of Statement)()
+
+        BlockStatement.Reference =
+            IfBlockStatement.TryCast(Of Statement)() Or
+            DoStatement.TryCast(Of Statement)()
 
         ReturnStatement.Reference =
             From keyword In ReturnKeyword
             From _nl1 In LineTerminator.Optional
             From returnValue In Expression.Optional()
-            From _st In ST.Many1()
-            Select TryCast(New ReturnStatement(keyword.Span, returnValue), Statement)
+            Select New ReturnStatement(keyword.Span, returnValue)
+
+        AssignmentStatement.Reference =
+            From id In ReferenceIdentifier
+            From _eq In EqualSymbol
+            From value In Expression
+            Select New AssignmentStatement(id, value)
+
+        IfThenStatement.Reference =
+            From _if In IfKeyword
+            From condition In Expression
+            From _then In ThenKeyword
+            From trueStatement In SingleLineStatement
+            From elsePart In (
+                From _else In ElseKeyword
+                From elseStatement In SingleLineStatement
+                Select elseStatement).Optional
+            Select New IfThenStatement(_if.Span, condition, trueStatement, elsePart)
+
+        Dim ElseIfBlock =
+            From _elseif In ElseIfKeyword
+            From condition In Expression
+            From _st In ST
+            From elseIfTruePart In Statements
+            Select New ElseIfBlock(_elseif.Span, condition, elseIfTruePart)
+
+        Dim ElseBlock =
+            From _else In ElseKeyword
+            From _st In ST
+            From elsePart In Statements
+            Select New ElseBlock(_else.Span, elsePart)
+
+        IfBlockStatement.Reference =
+            From _if In IfKeyword
+            From condition In Expression
+            From _st1 In ST
+            From truePart In Statements
+            From elseIfBlocks In ElseIfBlock.Many
+            From elseBlockOpt In ElseBlock.Optional
+            From _end In EndKeyword
+            From _st2 In ST
+            Select New IfBlockStatement(_if.Span, _end.Span, condition, truePart, elseIfBlocks, elseBlockOpt)
+
+        Dim DoLoopForm =
+            From _do In DoKeyword
+            From _st In ST
+            From loopBody In Statements
+            From _loop In LoopKeyword
+            From _st2 In ST
+            Select DoLoopStatement.DoLoopFrom(_do.Span, _loop.Span, loopBody)
+
+        Dim DoWhileLoopForm =
+            From _do In DoKeyword
+            From _while In WhileKeyword
+            From condition In Expression
+            From _st In ST
+            From loopBody In Statements
+            From _loop In LoopKeyword
+            From _st2 In ST
+            Select DoLoopStatement.DoWhileLoopFrom(_do.Span, _while.Span, _loop.Span, condition, loopBody)
+
+        Dim DoUntilLoopForm =
+            From _do In DoKeyword
+            From _until In UntilKeyword
+            From condition In Expression
+            From _st In ST
+            From loopBody In Statements
+            From _loop In LoopKeyword
+            From _st2 In ST
+            Select DoLoopStatement.DoUntilLoopFrom(_do.Span, _until.Span, _loop.Span, condition, loopBody)
+
+        Dim DoLoopWhileForm =
+            From _do In DoKeyword
+            From _st In ST
+            From loopBody In Statements
+            From _loop In LoopKeyword
+            From _while In WhileKeyword
+            From condition In Expression
+            From _st2 In ST
+            Select DoLoopStatement.DoLoopWhileFrom(_do.Span, _while.Span, _loop.Span, condition, loopBody)
+
+        Dim DoLoopUntilForm =
+            From _do In DoKeyword
+            From _st In ST
+            From loopBody In Statements
+            From _loop In LoopKeyword
+            From _until In UntilKeyword
+            From condition In Expression
+            From _st2 In ST
+            Select DoLoopStatement.DoLoopUntilFrom(_do.Span, _until.Span, _loop.Span, condition, loopBody)
+
+        DoStatement.Reference =
+            DoLoopForm Or
+            DoWhileLoopForm Or
+            DoUntilLoopForm Or
+            DoLoopWhileForm Or
+            DoLoopUntilForm
 
         Expression.Reference =
             From x In IntegerLiteral Select New Expression()

@@ -79,10 +79,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayTypeName.vb" />
+    <Compile Include="AssignmentStatement.vb" />
+    <Compile Include="DoStatement.vb" />
+    <Compile Include="ElseBlock.vb" />
+    <Compile Include="ElseIfBlock.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Expression.vb" />
     <Compile Include="FunctionDeclaration.vb" />
     <Compile Include="FunctionDefinition.vb" />
+    <Compile Include="IfBlockStatement.vb" />
+    <Compile Include="IfThenStatement.vb" />
     <Compile Include="PrimitiveTypeName.vb" />
     <Compile Include="QualifiedTypeName.vb" />
     <Compile Include="ReferenceIdentifier.vb" />
