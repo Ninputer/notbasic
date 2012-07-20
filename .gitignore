@@ -2,12 +2,7 @@
 TestResults/
 bin/
 obj/
-NotBasic.UnitTests/obj
-NotBasic.UnitTests/bin
-NotBasic.Console/obj
-NotBasic.Console/bin
-NotBasic/obj
-NotBasic/bin
+packages/
 
 # Project property files
 *.suo
