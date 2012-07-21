@@ -1,11 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
+# Visual Studio 2012
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NotBasic", "NotBasic\NotBasic.vbproj", "{686313E5-4937-47A7-A8D8-B8FEA72150EE}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NotBasic.UnitTests", "NotBasic.UnitTests\NotBasic.UnitTests.vbproj", "{4A75D892-F44E-41D0-BD3B-21A39CD3577B}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NotBasic.Console", "NotBasic.Console\NotBasic.Console.vbproj", "{2038EEBC-0963-4A7A-9132-8A2B73E0265A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2E0EA555-DDD5-4AF3-A1C8-3743856AD3D6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+		.nuget\nuget.exe = .nuget\nuget.exe
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
