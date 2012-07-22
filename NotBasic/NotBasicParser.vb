@@ -341,21 +341,20 @@ Public Class NotBasicParser
         triviaTokens.Add(WhiteSpace)
     End Sub
 
-    Private Program As New ParserReference(Of CompilationUnit)
-    Private StatementTerminator As New ParserReference(Of SourceSpan)
-    Private DeclaringIdentifier As New ParserReference(Of UnifiedIdentifer)
-    Private ParameterList As New ParserReference(Of IEnumerable(Of ParameterDeclaration))
-    Private ParameterDeclaration As New ParserReference(Of ParameterDeclaration)
-    Private FunctionDeclaration As New ParserReference(Of FunctionDeclaration)
-    Private FunctionDefinition As New ParserReference(Of FunctionDefinition)
-
     Private ReferenceIdentifier As New ParserReference(Of UnifiedIdentifer)
     Private QualifiedIdentifier As New ParserReference(Of UnifiedIdentifer)
-
+    Private StatementTerminator As New ParserReference(Of SourceSpan)
+    Private DeclaringIdentifier As New ParserReference(Of UnifiedIdentifer)
     Private TypeName As New ParserReference(Of TypeName)
     Private ArrayTypeName As New ParserReference(Of ArrayTypeName)
     Private PrimitiveTypeName As New ParserReference(Of PrimitiveTypeName)
     Private QualifiedTypeName As New ParserReference(Of QualifiedTypeName)
+
+    Private Program As New ParserReference(Of CompilationUnit)
+    Private ParameterList As New ParserReference(Of IEnumerable(Of ParameterDeclaration))
+    Private ParameterDeclaration As New ParserReference(Of ParameterDeclaration)
+    Private FunctionDeclaration As New ParserReference(Of FunctionDeclaration)
+    Private FunctionDefinition As New ParserReference(Of FunctionDefinition)
 
     Private Statements As New ParserReference(Of IEnumerable(Of Statement))
     Private Statement As New ParserReference(Of Statement)
