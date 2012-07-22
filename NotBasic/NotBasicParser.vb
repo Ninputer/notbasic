@@ -383,14 +383,51 @@ Public Class NotBasicParser
         'Statement terminator
         Dim ST = StatementTerminator.Many1()
 
+        '=======================================================================
+        ' Basic Structures
+        '=======================================================================
+
         DeclaringIdentifier.Reference =
             (From id In Identifier
             Select UnifiedIdentifer.FromIdentifier(id)) Or
             (From eid In EscapedIdentifier
             Select UnifiedIdentifer.FromEscapedIdentifier(eid))
 
+        ReferenceIdentifier.Reference =
+            DeclaringIdentifier
+
+        QualifiedIdentifier.Reference =
+            (From id In Identifier.AsParser(m_identifierLexerIndex)
+             Select UnifiedIdentifer.FromIdentifier(id)) Or
+            (From eid In EscapedIdentifier
+             Select UnifiedIdentifer.FromEscapedIdentifier(eid))
+
+        TypeName.Reference =
+            QualifiedTypeName.TryCast(Of TypeName)() Or
+            ArrayTypeName.TryCast(Of TypeName)() Or
+            PrimitiveTypeName.TryCast(Of TypeName)()
+
+        QualifiedTypeName.Reference =
+            (From id In ReferenceIdentifier Select New QualifiedTypeName(id)) Or
+            (From qualifier In QualifiedTypeName
+             From id In QualifiedIdentifier
+             Select New QualifiedTypeName(qualifier, id))
+
+        '=======================================================================
+        ' Program Entry
+        '=======================================================================
+
+        Program.Reference =
+            From _emptylines In StatementTerminator.Many
+            From functions In FunctionDefinition.Many()
+            Select New CompilationUnit(functions)
+
+        '=======================================================================
+        ' Functions
+        '=======================================================================
+
         ParameterList.Reference =
-            ParameterDeclaration.Many(Comma.AsParser().SuffixedBy(LC))
+           ParameterDeclaration.Many(Comma.AsParser().SuffixedBy(LC))
 
         ParameterDeclaration.Reference =
             From did In DeclaringIdentifier
@@ -415,30 +452,9 @@ Public Class NotBasicParser
             From _st In ST
             Select New FunctionDefinition(decl, statements, endfun.Span)
 
-        Program.Reference =
-            From _emptylines In StatementTerminator.Many
-            From functions In FunctionDefinition.Many()
-            Select New CompilationUnit(functions)
-
-        ReferenceIdentifier.Reference =
-            DeclaringIdentifier
-
-        QualifiedIdentifier.Reference =
-            (From id In Identifier.AsParser(m_identifierLexerIndex)
-             Select UnifiedIdentifer.FromIdentifier(id)) Or
-            (From eid In EscapedIdentifier
-             Select UnifiedIdentifer.FromEscapedIdentifier(eid))
-
-        TypeName.Reference =
-            QualifiedTypeName.TryCast(Of TypeName)() Or
-            ArrayTypeName.TryCast(Of TypeName)() Or
-            PrimitiveTypeName.TryCast(Of TypeName)()
-
-        QualifiedTypeName.Reference =
-            (From id In ReferenceIdentifier Select New QualifiedTypeName(id)) Or
-            (From qualifier In QualifiedTypeName
-             From id In QualifiedIdentifier
-             Select New QualifiedTypeName(qualifier, id))
+        '=======================================================================
+        ' Statements
+        '=======================================================================
 
         Statements.Reference =
             Statement.Many()
@@ -557,6 +573,10 @@ Public Class NotBasicParser
             DoUntilLoopForm Or
             DoLoopWhileForm Or
             DoLoopUntilForm
+
+        '=======================================================================
+        ' Expressions
+        '=======================================================================
 
         Expression.Reference =
             From x In IntegerLiteral Select New Expression()

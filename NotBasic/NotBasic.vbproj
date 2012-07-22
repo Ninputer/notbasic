@@ -78,30 +78,30 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayTypeName.vb" />
-    <Compile Include="AssignmentStatement.vb" />
-    <Compile Include="DoLoopStatement.vb" />
-    <Compile Include="ElseBlock.vb" />
-    <Compile Include="ElseIfBlock.vb" />
-    <Compile Include="ErrorCode.vb" />
-    <Compile Include="Expression.vb" />
-    <Compile Include="FunctionDeclaration.vb" />
-    <Compile Include="FunctionDefinition.vb" />
-    <Compile Include="IfBlockStatement.vb" />
-    <Compile Include="IfThenStatement.vb" />
-    <Compile Include="PrimitiveTypeName.vb" />
-    <Compile Include="QualifiedTypeName.vb" />
-    <Compile Include="ReferenceIdentifier.vb" />
-    <Compile Include="ReturnStatement.vb" />
-    <Compile Include="Statement.vb" />
-    <Compile Include="TypeName.vb" />
-    <Compile Include="UnifiedIdentifer.vb" />
+    <Compile Include="Ast\ArrayTypeName.vb" />
+    <Compile Include="Ast\AssignmentStatement.vb" />
+    <Compile Include="Ast\DoLoopStatement.vb" />
+    <Compile Include="Ast\ElseBlock.vb" />
+    <Compile Include="Ast\ElseIfBlock.vb" />
+    <Compile Include="Ast\ErrorCode.vb" />
+    <Compile Include="Ast\Expression.vb" />
+    <Compile Include="Ast\FunctionDeclaration.vb" />
+    <Compile Include="Ast\FunctionDefinition.vb" />
+    <Compile Include="Ast\IfBlockStatement.vb" />
+    <Compile Include="Ast\IfThenStatement.vb" />
+    <Compile Include="Ast\PrimitiveTypeName.vb" />
+    <Compile Include="Ast\QualifiedTypeName.vb" />
+    <Compile Include="Ast\ReferenceIdentifier.vb" />
+    <Compile Include="Ast\ReturnStatement.vb" />
+    <Compile Include="Ast\Statement.vb" />
+    <Compile Include="Ast\TypeName.vb" />
+    <Compile Include="Ast\UnifiedIdentifer.vb" />
     <Compile Include="KeywordManager.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="NotBasicParser.vb" />
-    <Compile Include="ParameterDeclaration.vb" />
-    <Compile Include="CompilationUnit.vb" />
-    <Compile Include="SyntaxTreeNode.vb" />
+    <Compile Include="Ast\ParameterDeclaration.vb" />
+    <Compile Include="Ast\CompilationUnit.vb" />
+    <Compile Include="Ast\SyntaxTreeNode.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
