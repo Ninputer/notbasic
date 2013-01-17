@@ -363,13 +363,36 @@ Public Class NotBasicParser
 
     Private ReturnStatement As New ParserReference(Of ReturnStatement)
     Private AssignmentStatement As New ParserReference(Of AssignmentStatement)
-    Private ExpressionStatement As New ParserReference(Of Statement)
+    Private ExpressionStatement As New ParserReference(Of ExpressionStatement)
     Private CallStatement As New ParserReference(Of Statement)
     Private IfThenStatement As New ParserReference(Of IfThenStatement)
     Private IfBlockStatement As New ParserReference(Of IfBlockStatement)
     Private DoStatement As New ParserReference(Of DoLoopStatement)
 
     Private Expression As New ParserReference(Of Expression)
+    Private PrimaryExpression As New ParserReference(Of Expression)
+    Private FactorExpression As New ParserReference(Of Expression)
+    Private TermExpression As New ParserReference(Of Expression)
+    Private ComparandExpression As New ParserReference(Of Expression)
+    Private ComparisonExpression As New ParserReference(Of Expression)
+    Private EqualityExpression As New ParserReference(Of Expression)
+    Private AndExpression As New ParserReference(Of Expression)
+    Private OrExpression As New ParserReference(Of Expression)
+    Private XorExpression As New ParserReference(Of Expression)
+    Private ShiftingExpression As New ParserReference(Of Expression)
+    Private UnaryExpression As New ParserReference(Of Expression)
+    Private IntegerLiteralExpression As New ParserReference(Of Expression)
+    Private FloatLiteralExpression As New ParserReference(Of Expression)
+    Private NumericLiteralExpression As New ParserReference(Of Expression)
+    Private BooleanLiteralExpression As New ParserReference(Of Expression)
+    Private NewArrayExpression As New ParserReference(Of Expression)
+    Private ReferenceExpression As New ParserReference(Of Expression)
+
+    Private BracketExpression As New ParserReference(Of Func(Of Expression, Expression))
+    Private CallExpression As New ParserReference(Of Func(Of Expression, Expression))
+
+    Private ArgumentList As New ParserReference(Of ArgumentList)
+
 
     Protected Overrides Function OnDefineParser() As Combinators.Parser(Of CompilationUnit)
         StatementTerminator.Reference =
@@ -411,6 +434,12 @@ Public Class NotBasicParser
             (From qualifier In QualifiedTypeName
              From id In QualifiedIdentifier
              Select New QualifiedTypeName(qualifier, id))
+
+        PrimitiveTypeName.Reference =
+            From inttype In IntKeyword
+            Select New PrimitiveTypeName()
+
+
 
         '=======================================================================
         ' Program Entry
@@ -465,7 +494,8 @@ Public Class NotBasicParser
         SingleLineStatement.Reference =
             ReturnStatement.TryCast(Of Statement)() Or
             AssignmentStatement.TryCast(Of Statement)() Or
-            IfThenStatement.TryCast(Of Statement)()
+            IfThenStatement.TryCast(Of Statement)() Or
+            ExpressionStatement.TryCast(Of Statement)()
 
         BlockStatement.Reference =
             IfBlockStatement.TryCast(Of Statement)() Or
@@ -480,8 +510,16 @@ Public Class NotBasicParser
         AssignmentStatement.Reference =
             From id In ReferenceIdentifier
             From _eq In EqualSymbol
+            From lb In LineTerminator.Optional()
             From value In Expression
             Select New AssignmentStatement(id, value)
+
+        ExpressionStatement.Reference =
+            (From exp In NewArrayExpression
+            Select New ExpressionStatement(exp)) Or
+            (From exp In PrimaryExpression
+            From callexp In CallExpression
+            Select New ExpressionStatement(callexp(exp)))
 
         IfThenStatement.Reference =
             From _if In IfKeyword
@@ -576,9 +614,214 @@ Public Class NotBasicParser
         '=======================================================================
         ' Expressions
         '=======================================================================
+        IntegerLiteralExpression.Reference =
+            From literal In IntegerLiteral
+            Select New IntegerLiteralExpression(literal).ToExpression
 
-        Expression.Reference =
-            From x In IntegerLiteral Select New Expression()
+        FloatLiteralExpression.Reference =
+            From literal In FloatLiteral
+            Select New FloatLiteralExpression(literal).ToExpression
+
+        NumericLiteralExpression.Reference =
+            IntegerLiteralExpression Or FloatLiteralExpression
+
+        BooleanLiteralExpression.Reference =
+            From literal In (TrueKeyword.AsParser() Or FalseKeyword.AsParser())
+            Select New BooleanLiteralExpression(literal).ToExpression
+
+        ReferenceExpression.Reference =
+            From id In ReferenceIdentifier
+            Select New ReferenceExpression(id).ToExpression
+
+        NewArrayExpression.Reference =
+            From _new In NewKeyword
+            From type In TypeName
+            From _lbk In LeftBrck
+            From lb In LineTerminator.Optional()
+            From length In Expression
+            From lb2 In LineTerminator.Optional()
+            From _rbk In RightBrck
+            Select New NewArrayExpression(_new.Span, _lbk.Span, _rbk.Span, type, length).ToExpression
+
+        PrimaryExpression.Reference =
+            NumericLiteralExpression Or
+            BooleanLiteralExpression Or
+            ReferenceExpression Or
+            NewArrayExpression Or
+            Expression.PackedBy(LeftPth, RightPth)
+
+        CallExpression.Reference =
+            From _lph In LeftPth
+            From lb In LineTerminator.Optional()
+            From arguments In ArgumentList
+            From lb2 In LineTerminator.Optional()
+            From _rph In RightPth
+            Select New Func(Of Expression, Expression)(Function(callable) New CallExpression(callable, arguments))
+
+        BracketExpression.Reference =
+            From _lbk In LeftBrck
+            From lb In LineTerminator.Optional()
+            From arguments In ArgumentList
+            From lb2 In LineTerminator.Optional()
+            From _rbk In RightBrck
+            Select New Func(Of Expression, Expression)(Function(indexable) New BracketExpression(indexable, arguments))
+
+        Dim basicExpression =
+            From exp In PrimaryExpression
+            From follow In (CallExpression Or BracketExpression).Optional()
+            Select If(follow Is Nothing, exp, follow(exp))
+
+        ' unary expressions
+        UnaryExpression.Reference =
+            basicExpression Or
+            (From op In MinusSymbol
+            From exp In UnaryExpression
+            Select New UnaryExpression(op.Span, ExpressionOp.Minus, exp).ToExpression) Or
+            (From op In PlusSymbol
+            From exp In UnaryExpression
+            Select New UnaryExpression(op.Span, ExpressionOp.Plus, exp).ToExpression) Or
+            (From op In NotKeyword
+            From exp In UnaryExpression
+            Select New UnaryExpression(op.Span, ExpressionOp.Not, exp).ToExpression)
+
+        'binary expressions
+        FactorExpression.Reference = UnaryExpression
+
+        'multiplicative * / mod
+        Dim termRest =
+            (From op In Asterisk
+            From lb In LineTerminator.Optional()
+            From factor In FactorExpression
+            Select New With {.Op = ExpressionOp.Multiplication, .Right = factor}) Or
+            (From op In Slash
+            From lb In LineTerminator.Optional()
+            From factor In FactorExpression
+            Select New With {.Op = ExpressionOp.Divition, .Right = factor}) Or
+            (From op In ModKeyword
+            From lb In LineTerminator.Optional()
+            From factor In FactorExpression
+            Select New With {.Op = ExpressionOp.Modulo, .Right = factor})
+
+        TermExpression.Reference =
+            From factor In FactorExpression
+            From rest In termRest.Many
+            Select rest.Aggregate(factor, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'additive + -
+        Dim shiftingRest =
+            (From op In PlusSymbol
+            From lb In LineTerminator.Optional()
+            From term In TermExpression
+            Select New With {.Op = ExpressionOp.Addition, .Right = term}) Or
+            (From op In MinusSymbol
+            From lb In LineTerminator.Optional()
+            From term In TermExpression
+            Select New With {.Op = ExpressionOp.Substraction, .Right = term})
+
+        ShiftingExpression.Reference =
+            From term In TermExpression
+            From rest In shiftingRest.Many
+            Select rest.Aggregate(term, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'shifting >> <<
+        Dim comparandRest =
+           (From op In ShiftLeft
+           From lb In LineTerminator.Optional()
+           From shifting In ShiftingExpression
+           Select New With {.Op = ExpressionOp.ShiftLeft, .Right = shifting}) Or
+           (From g1 In GreaterSymbol
+           From g2 In GreaterSymbol.Where(Function(g) g.PrefixTrivia.Count = 0)
+           From lb In LineTerminator.Optional()
+           From shifting In ShiftingExpression
+           Select New With {.Op = ExpressionOp.ShiftRight, .Right = shifting})
+
+        ComparandExpression.Reference =
+            From shifting In ShiftingExpression
+            From rest In comparandRest.Many
+            Select rest.Aggregate(shifting, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'comparison > >= < <=
+        Dim comparisonRest =
+            (From op In GreaterSymbol
+            From lb In LineTerminator.Optional()
+            From comparand In ComparandExpression
+            Select New With {.Op = ExpressionOp.Greater, .Right = comparand}) Or
+            (From op In GreaterEqual
+            From lb In LineTerminator.Optional()
+            From comparand In ComparandExpression
+            Select New With {.Op = ExpressionOp.GreaterEqual, .Right = comparand}) Or
+            (From op In LessSymbol
+            From lb In LineTerminator.Optional()
+            From comparand In ComparandExpression
+            Select New With {.Op = ExpressionOp.Less, .Right = comparand}) Or
+            (From op In LessEqual
+            From lb In LineTerminator.Optional()
+            From comparand In ComparandExpression
+            Select New With {.Op = ExpressionOp.LessEqual, .Right = comparand})
+
+        ComparisonExpression.Reference =
+            From comparand In ComparandExpression
+            From rest In comparisonRest.Many
+            Select rest.Aggregate(comparand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+
+        'equality =  <>
+        Dim equalityRest =
+            (From op In EqualSymbol
+            From lb In LineTerminator.Optional()
+            From comparison In ComparisonExpression
+            Select New With {.Op = ExpressionOp.Equal, .Right = comparison}) Or
+            (From op In NotEqual
+            From lb In LineTerminator.Optional()
+            From comparison In ComparisonExpression
+            Select New With {.Op = ExpressionOp.NotEqual, .Right = comparison})
+
+        EqualityExpression.Reference =
+            From comparison In ComparisonExpression
+            From rest In equalityRest.Many
+            Select rest.Aggregate(comparison, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'and
+        Dim andRest =
+            From op In AndKeyword
+            From lb In LineTerminator.Optional()
+            From equality In EqualityExpression
+            Select New With {.Op = ExpressionOp.And, .Right = equality}
+
+        AndExpression.Reference =
+            From equality In EqualityExpression
+            From rest In andRest.Many
+            Select rest.Aggregate(equality, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'xor
+        Dim xorRest =
+            From op In XorKeyword
+            From lb In LineTerminator.Optional()
+            From andoperand In AndExpression
+            Select New With {.Op = ExpressionOp.Xor, .Right = andoperand}
+
+        XorExpression.Reference =
+            From andoperand In AndExpression
+            From rest In xorRest.Many
+            Select rest.Aggregate(andoperand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        'or
+        Dim orRest =
+            From op In OrKeyword
+            From lb In LineTerminator.Optional()
+            From xoroperand In XorExpression
+            Select New With {.Op = ExpressionOp.Or, .Right = xoroperand}
+
+        OrExpression.Reference =
+            From xoroperand In XorExpression
+            From rest In orRest.Many
+            Select rest.Aggregate(xoroperand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
+
+        Expression.Reference = OrExpression
+
+        ArgumentList.Reference =
+            From list In Expression.Many(Comma.Concat(LineTerminator.Optional()))
+            Select New ArgumentList(list.Select(Function(exp) New Argument(exp)))
 
         ScannerInfo.CurrentLexerIndex = m_keywordLexerIndex
         'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)

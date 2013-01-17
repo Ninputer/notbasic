@@ -2,15 +2,16 @@
 Public Class FunctionDefinition
     Inherits SyntaxTreeNode
 
-    Private _decl As FunctionDeclaration
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _statements As IEnumerable(Of Statement)
+    Private m_decl As FunctionDeclaration
+    Private m_sourceSpan As Compilers.SourceSpan
+    Private m_statements As IList(Of Statement)
 
     Sub New(decl As FunctionDeclaration, statements As IEnumerable(Of Statement), sourceSpan As Compilers.SourceSpan)
-        ' TODO: Complete member initialization 
-        _decl = decl
-        _statements = statements
-        _sourceSpan = sourceSpan
+        If statements Is Nothing Then Exit Sub
+
+        m_decl = decl
+        m_statements = statements.ToArray()
+        m_sourceSpan = sourceSpan
     End Sub
 
 End Class

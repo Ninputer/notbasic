@@ -78,13 +78,17 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ast\Argument.vb" />
+    <Compile Include="Ast\ArgumentList.vb" />
     <Compile Include="Ast\ArrayTypeName.vb" />
     <Compile Include="Ast\AssignmentStatement.vb" />
     <Compile Include="Ast\DoLoopStatement.vb" />
     <Compile Include="Ast\ElseBlock.vb" />
     <Compile Include="Ast\ElseIfBlock.vb" />
     <Compile Include="Ast\ErrorCode.vb" />
+    <Compile Include="Ast\ExitDoStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
+    <Compile Include="Ast\ExpressionOp.vb" />
     <Compile Include="Ast\FunctionDeclaration.vb" />
     <Compile Include="Ast\FunctionDefinition.vb" />
     <Compile Include="Ast\IfBlockStatement.vb" />
@@ -96,12 +100,22 @@
     <Compile Include="Ast\Statement.vb" />
     <Compile Include="Ast\TypeName.vb" />
     <Compile Include="Ast\UnifiedIdentifer.vb" />
+    <Compile Include="Ast\IntegerLiteralExpression.vb" />
+    <Compile Include="Ast\BinaryExpression.vb" />
+    <Compile Include="Ast\BooleanLiteralExpression.vb" />
+    <Compile Include="Ast\BracketExpression.vb" />
+    <Compile Include="Ast\CallExpression.vb" />
+    <Compile Include="Ast\ExpressionStatement.vb" />
+    <Compile Include="Ast\FloatLiteralExpression.vb" />
     <Compile Include="KeywordManager.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="Ast\NewArrayExpression.vb" />
     <Compile Include="NotBasicParser.vb" />
     <Compile Include="Ast\ParameterDeclaration.vb" />
     <Compile Include="Ast\CompilationUnit.vb" />
     <Compile Include="Ast\SyntaxTreeNode.vb" />
+    <Compile Include="Ast\ReferenceExpression.vb" />
+    <Compile Include="Ast\UnaryExpression.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

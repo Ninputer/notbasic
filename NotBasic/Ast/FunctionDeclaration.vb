@@ -2,15 +2,15 @@
 Public Class FunctionDeclaration
     Inherits SyntaxTreeNode
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _name As UnifiedIdentifer
-    Private _paramlist As IEnumerable(Of ParameterDeclaration)
+    Private m_sourceSpan As Compilers.SourceSpan
+    Private m_name As UnifiedIdentifer
+    Private m_paramlist As IList(Of ParameterDeclaration)
 
     Sub New(sourceSpan As Compilers.SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _name = name
-        _paramlist = paramlist
+        If paramlist Is Nothing Then Exit Sub
+        m_sourceSpan = sourceSpan
+        m_name = name
+        m_paramlist = paramlist.ToArray()
     End Sub
 
 End Class
