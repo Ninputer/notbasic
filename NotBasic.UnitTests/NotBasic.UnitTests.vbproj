@@ -11,6 +11,8 @@
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,13 +55,13 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="VBF.Compilers.Common">
-      <HintPath>..\..\..\..\..\GitRoot\VBF\bin\VBF.Compilers.Common.dll</HintPath>
+      <HintPath>..\..\VBF\bin\VBF.Compilers.Common.dll</HintPath>
     </Reference>
-    <Reference Include="VBF.Compilers.Parsers.Combinators">
-      <HintPath>..\..\..\..\..\GitRoot\VBF\bin\VBF.Compilers.Parsers.Combinators.dll</HintPath>
+    <Reference Include="VBF.Compilers.Parsers">
+      <HintPath>..\..\VBF\bin\VBF.Compilers.Parsers.dll</HintPath>
     </Reference>
     <Reference Include="VBF.Compilers.Scanners">
-      <HintPath>..\..\..\..\..\GitRoot\VBF\bin\VBF.Compilers.Scanners.dll</HintPath>
+      <HintPath>..\..\VBF\bin\VBF.Compilers.Scanners.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +89,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

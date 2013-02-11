@@ -6,5 +6,6 @@
     Public Const MissingToken As Integer = 2001
     Public Const UnexpectedToken As Integer = 2002
 
+    Public Const GeneralSyntaxError As Integer = 2999
 
 End Module

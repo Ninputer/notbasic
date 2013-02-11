@@ -59,9 +59,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\GitRoot\VBF\bin\VBF.Compilers.Common.dll</HintPath>
     </Reference>
-    <Reference Include="VBF.Compilers.Parsers.Combinators, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\GitRoot\VBF\bin\VBF.Compilers.Parsers.Combinators.dll</HintPath>
+    <Reference Include="VBF.Compilers.Parsers">
+      <HintPath>..\..\VBF\bin\VBF.Compilers.Parsers.dll</HintPath>
     </Reference>
     <Reference Include="VBF.Compilers.Scanners, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -85,7 +84,7 @@
     <Compile Include="Ast\DoLoopStatement.vb" />
     <Compile Include="Ast\ElseBlock.vb" />
     <Compile Include="Ast\ElseIfBlock.vb" />
-    <Compile Include="Ast\ErrorCode.vb" />
+    <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitDoStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
     <Compile Include="Ast\ExpressionOp.vb" />

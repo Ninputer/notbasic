@@ -1,12 +1,11 @@
 ﻿Imports VBF.Compilers
 Imports VBF.Compilers.Scanners
-Imports VBF.Compilers.Parsers.Combinators
 Imports VBF.Compilers.Parsers
 Imports VBF.Compilers.Scanners.RegularExpression
 Imports System.Globalization
 
 Public Class NotBasicParser
-    Inherits ParserFrame(Of CompilationUnit)
+    Inherits ParserBase(Of CompilationUnit)
 
     'Lexer states
     Private m_identifierLexerIndex As Integer
@@ -105,7 +104,7 @@ Public Class NotBasicParser
     Private Comment As Token
 
     Public Sub New(errorManager As CompilationErrorManager)
-        MyBase.New(errorManager, ErrorCode.InvalidToken, ErrorCode.MissingToken, ErrorCode.UnexpectedToken)
+        MyBase.New(errorManager)
     End Sub
 
     Protected Overrides Sub OnDefineLexer(lexicon As Lexicon, triviaTokens As ICollection(Of Token))
@@ -341,62 +340,73 @@ Public Class NotBasicParser
         triviaTokens.Add(WhiteSpace)
     End Sub
 
-    Private ReferenceIdentifier As New ParserReference(Of UnifiedIdentifer)
-    Private QualifiedIdentifier As New ParserReference(Of UnifiedIdentifer)
-    Private StatementTerminator As New ParserReference(Of SourceSpan)
-    Private DeclaringIdentifier As New ParserReference(Of UnifiedIdentifer)
-    Private TypeName As New ParserReference(Of TypeName)
-    Private ArrayTypeName As New ParserReference(Of ArrayTypeName)
-    Private PrimitiveTypeName As New ParserReference(Of PrimitiveTypeName)
-    Private QualifiedTypeName As New ParserReference(Of QualifiedTypeName)
+    Private ReferenceIdentifier As New Production(Of UnifiedIdentifer)
+    Private QualifiedIdentifier As New Production(Of UnifiedIdentifer)
+    Private StatementTerminator As New Production(Of SourceSpan)
+    Private DeclaringIdentifier As New Production(Of UnifiedIdentifer)
+    Private TypeName As New Production(Of TypeName)
+    Private ArrayTypeName As New Production(Of TypeName)
+    Private PrimitiveTypeName As New Production(Of TypeName)
+    Private QualifiedTypeName As New Production(Of TypeName)
 
-    Private Program As New ParserReference(Of CompilationUnit)
-    Private ParameterList As New ParserReference(Of IEnumerable(Of ParameterDeclaration))
-    Private ParameterDeclaration As New ParserReference(Of ParameterDeclaration)
-    Private FunctionDeclaration As New ParserReference(Of FunctionDeclaration)
-    Private FunctionDefinition As New ParserReference(Of FunctionDefinition)
+    Private Program As New Production(Of CompilationUnit)
+    Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
+    Private ParameterDeclaration As New Production(Of ParameterDeclaration)
+    Private FunctionDeclaration As New Production(Of FunctionDeclaration)
+    Private FunctionDefinition As New Production(Of FunctionDefinition)
 
-    Private Statements As New ParserReference(Of IEnumerable(Of Statement))
-    Private Statement As New ParserReference(Of Statement)
-    Private SingleLineStatement As New ParserReference(Of Statement)
-    Private BlockStatement As New ParserReference(Of Statement)
+    Private Statements As New Production(Of IEnumerable(Of Statement))
+    Private Statement As New Production(Of Statement)
+    Private SingleLineStatement As New Production(Of Statement)
+    Private BlockStatement As New Production(Of Statement)
 
-    Private ReturnStatement As New ParserReference(Of ReturnStatement)
-    Private AssignmentStatement As New ParserReference(Of AssignmentStatement)
-    Private ExpressionStatement As New ParserReference(Of ExpressionStatement)
-    Private CallStatement As New ParserReference(Of Statement)
-    Private IfThenStatement As New ParserReference(Of IfThenStatement)
-    Private IfBlockStatement As New ParserReference(Of IfBlockStatement)
-    Private DoStatement As New ParserReference(Of DoLoopStatement)
+    Private ReturnStatement As New Production(Of Statement)
+    Private AssignmentStatement As New Production(Of Statement)
+    Private ExpressionStatement As New Production(Of Statement)
+    Private CallStatement As New Production(Of Statement)
+    Private IfThenStatement As New Production(Of Statement)
+    Private IfBlockStatement As New Production(Of Statement)
+    Private DoStatement As New Production(Of Statement)
 
-    Private Expression As New ParserReference(Of Expression)
-    Private PrimaryExpression As New ParserReference(Of Expression)
-    Private FactorExpression As New ParserReference(Of Expression)
-    Private TermExpression As New ParserReference(Of Expression)
-    Private ComparandExpression As New ParserReference(Of Expression)
-    Private ComparisonExpression As New ParserReference(Of Expression)
-    Private EqualityExpression As New ParserReference(Of Expression)
-    Private AndExpression As New ParserReference(Of Expression)
-    Private OrExpression As New ParserReference(Of Expression)
-    Private XorExpression As New ParserReference(Of Expression)
-    Private ShiftingExpression As New ParserReference(Of Expression)
-    Private UnaryExpression As New ParserReference(Of Expression)
-    Private IntegerLiteralExpression As New ParserReference(Of Expression)
-    Private FloatLiteralExpression As New ParserReference(Of Expression)
-    Private NumericLiteralExpression As New ParserReference(Of Expression)
-    Private BooleanLiteralExpression As New ParserReference(Of Expression)
-    Private NewArrayExpression As New ParserReference(Of Expression)
-    Private ReferenceExpression As New ParserReference(Of Expression)
+    Private Expression As New Production(Of Expression)
+    Private PrimaryExpression As New Production(Of Expression)
+    Private FactorExpression As New Production(Of Expression)
+    Private TermExpression As New Production(Of Expression)
+    Private ComparandExpression As New Production(Of Expression)
+    Private ComparisonExpression As New Production(Of Expression)
+    Private EqualityExpression As New Production(Of Expression)
+    Private AndExpression As New Production(Of Expression)
+    Private OrExpression As New Production(Of Expression)
+    Private XorExpression As New Production(Of Expression)
+    Private ShiftingExpression As New Production(Of Expression)
+    Private UnaryExpression As New Production(Of Expression)
+    Private IntegerLiteralExpression As New Production(Of Expression)
+    Private FloatLiteralExpression As New Production(Of Expression)
+    Private NumericLiteralExpression As New Production(Of Expression)
+    Private BooleanLiteralExpression As New Production(Of Expression)
+    Private NewArrayExpression As New Production(Of Expression)
+    Private ReferenceExpression As New Production(Of Expression)
 
-    Private BracketExpression As New ParserReference(Of Func(Of Expression, Expression))
-    Private CallExpression As New ParserReference(Of Func(Of Expression, Expression))
+    Private BracketExpression As New Production(Of Func(Of Expression, Expression))
+    Private CallExpression As New Production(Of Func(Of Expression, Expression))
 
-    Private ArgumentList As New ParserReference(Of ArgumentList)
+    Private ArgumentList As New Production(Of ArgumentList)
 
+    Protected Overrides Sub OnDefineParserErrors(errorDefinition As SyntaxErrors, errorManager As CompilationErrorManager)
 
-    Protected Overrides Function OnDefineParser() As Combinators.Parser(Of CompilationUnit)
-        StatementTerminator.Reference =
-            From terminator In (LineTerminator.AsParser() Or Semicolon.AsParser())
+        With errorDefinition
+            .LexicalErrorId = ErrorCode.InvalidToken
+            .TokenMissingId = ErrorCode.MissingToken
+            .TokenUnexpectedId = ErrorCode.UnexpectedToken
+            .OtherErrorId = ErrorCode.GeneralSyntaxError
+        End With
+
+        MyBase.OnDefineParserErrors(errorDefinition, errorManager)
+    End Sub
+
+    Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
+        StatementTerminator.Rule =
+            From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
             Select terminator.Span
 
         'Line continuation
@@ -409,35 +419,35 @@ Public Class NotBasicParser
         ' Basic Structures
         '=======================================================================
 
-        DeclaringIdentifier.Reference =
+        DeclaringIdentifier.Rule =
             (From id In Identifier
             Select UnifiedIdentifer.FromIdentifier(id)) Or
             (From eid In EscapedIdentifier
             Select UnifiedIdentifer.FromEscapedIdentifier(eid))
 
-        ReferenceIdentifier.Reference =
+        ReferenceIdentifier.Rule =
             DeclaringIdentifier
 
-        QualifiedIdentifier.Reference =
-            (From id In Identifier.AsParser(m_identifierLexerIndex)
+        QualifiedIdentifier.Rule =
+            (From id In Identifier.AsTerminal()
              Select UnifiedIdentifer.FromIdentifier(id)) Or
             (From eid In EscapedIdentifier
              Select UnifiedIdentifer.FromEscapedIdentifier(eid))
 
-        TypeName.Reference =
-            QualifiedTypeName.TryCast(Of TypeName)() Or
-            ArrayTypeName.TryCast(Of TypeName)() Or
-            PrimitiveTypeName.TryCast(Of TypeName)()
+        TypeName.Rule =
+            QualifiedTypeName Or
+            PrimitiveTypeName
+        'ArrayTypeName Or
 
-        QualifiedTypeName.Reference =
-            (From id In ReferenceIdentifier Select New QualifiedTypeName(id)) Or
+        QualifiedTypeName.Rule =
+            (From id In ReferenceIdentifier Select DirectCast(New QualifiedTypeName(id), TypeName)) Or
             (From qualifier In QualifiedTypeName
              From id In QualifiedIdentifier
-             Select New QualifiedTypeName(qualifier, id))
+             Select DirectCast(New QualifiedTypeName(DirectCast(qualifier, QualifiedTypeName), id), TypeName))
 
-        PrimitiveTypeName.Reference =
+        PrimitiveTypeName.Rule =
             From inttype In IntKeyword
-            Select New PrimitiveTypeName()
+            Select DirectCast(New PrimitiveTypeName(), TypeName)
 
 
 
@@ -445,7 +455,7 @@ Public Class NotBasicParser
         ' Program Entry
         '=======================================================================
 
-        Program.Reference =
+        Program.Rule =
             From _emptylines In StatementTerminator.Many
             From functions In FunctionDefinition.Many()
             Select New CompilationUnit(functions)
@@ -454,15 +464,15 @@ Public Class NotBasicParser
         ' Functions
         '=======================================================================
 
-        ParameterList.Reference =
-           ParameterDeclaration.Many(Comma.AsParser().SuffixedBy(LC))
+        ParameterList.Rule =
+           ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LC))
 
-        ParameterDeclaration.Reference =
+        ParameterDeclaration.Rule =
             From did In DeclaringIdentifier
             Select New ParameterDeclaration(did)
 
         'FunctionDeclaration := fun name ( arglist ) <st>
-        FunctionDeclaration.Reference =
+        FunctionDeclaration.Rule =
             From keyword In FunctionKeyword
             From name In DeclaringIdentifier
             From _lpth In LeftPth
@@ -473,7 +483,7 @@ Public Class NotBasicParser
             From _st In ST
             Select New FunctionDeclaration(keyword.Span, name, paramlist)
 
-        FunctionDefinition.Reference =
+        FunctionDefinition.Rule =
             From decl In FunctionDeclaration
             From statements In statements
             From endfun In EndKeyword
@@ -484,44 +494,44 @@ Public Class NotBasicParser
         ' Statements
         '=======================================================================
 
-        Statements.Reference =
+        Statements.Rule =
             Statement.Many()
 
-        Statement.Reference =
+        Statement.Rule =
             SingleLineStatement.SuffixedBy(ST) Or
             BlockStatement
 
-        SingleLineStatement.Reference =
-            ReturnStatement.TryCast(Of Statement)() Or
-            AssignmentStatement.TryCast(Of Statement)() Or
-            IfThenStatement.TryCast(Of Statement)() Or
-            ExpressionStatement.TryCast(Of Statement)()
+        SingleLineStatement.Rule =
+            ReturnStatement Or
+            AssignmentStatement Or
+            IfThenStatement Or
+            ExpressionStatement
 
-        BlockStatement.Reference =
-            IfBlockStatement.TryCast(Of Statement)() Or
-            DoStatement.TryCast(Of Statement)()
+        BlockStatement.Rule =
+            IfBlockStatement Or
+            DoStatement
 
-        ReturnStatement.Reference =
+        ReturnStatement.Rule =
             From keyword In ReturnKeyword
             From _nl1 In LineTerminator.Optional
             From returnValue In Expression.Optional()
-            Select New ReturnStatement(keyword.Span, returnValue)
+            Select DirectCast(New ReturnStatement(keyword.Span, returnValue), Statement)
 
-        AssignmentStatement.Reference =
+        AssignmentStatement.Rule =
             From id In ReferenceIdentifier
             From _eq In EqualSymbol
             From lb In LineTerminator.Optional()
             From value In Expression
-            Select New AssignmentStatement(id, value)
+            Select DirectCast(New AssignmentStatement(id, value), Statement)
 
-        ExpressionStatement.Reference =
+        ExpressionStatement.Rule =
             (From exp In NewArrayExpression
-            Select New ExpressionStatement(exp)) Or
+            Select DirectCast(New ExpressionStatement(exp), Statement)) Or
             (From exp In PrimaryExpression
             From callexp In CallExpression
-            Select New ExpressionStatement(callexp(exp)))
+            Select DirectCast(New ExpressionStatement(callexp(exp)), Statement))
 
-        IfThenStatement.Reference =
+        IfThenStatement.Rule =
             From _if In IfKeyword
             From condition In Expression
             From _then In ThenKeyword
@@ -530,7 +540,7 @@ Public Class NotBasicParser
                 From _else In ElseKeyword
                 From elseStatement In SingleLineStatement
                 Select elseStatement).Optional
-            Select New IfThenStatement(_if.Span, condition, trueStatement, elsePart)
+            Select DirectCast(New IfThenStatement(_if.Span, condition, trueStatement, elsePart), Statement)
 
         Dim ElseIfBlock =
             From _elseif In ElseIfKeyword
@@ -545,7 +555,7 @@ Public Class NotBasicParser
             From elsePart In Statements
             Select New ElseBlock(_else.Span, elsePart)
 
-        IfBlockStatement.Reference =
+        IfBlockStatement.Rule =
             From _if In IfKeyword
             From condition In Expression
             From _st1 In ST
@@ -554,7 +564,7 @@ Public Class NotBasicParser
             From elseBlockOpt In ElseBlock.Optional
             From _end In EndKeyword
             From _st2 In ST
-            Select New IfBlockStatement(_if.Span, _end.Span, condition, truePart, elseIfBlocks, elseBlockOpt)
+            Select DirectCast(New IfBlockStatement(_if.Span, _end.Span, condition, truePart, elseIfBlocks, elseBlockOpt), Statement)
 
         Dim DoLoopForm =
             From _do In DoKeyword
@@ -604,7 +614,7 @@ Public Class NotBasicParser
             From _st2 In ST
             Select DoLoopStatement.DoLoopUntilFrom(_do.Span, _until.Span, _loop.Span, condition, loopBody)
 
-        DoStatement.Reference =
+        DoStatement.Rule =
             DoLoopForm Or
             DoWhileLoopForm Or
             DoUntilLoopForm Or
@@ -614,26 +624,26 @@ Public Class NotBasicParser
         '=======================================================================
         ' Expressions
         '=======================================================================
-        IntegerLiteralExpression.Reference =
+        IntegerLiteralExpression.Rule =
             From literal In IntegerLiteral
             Select New IntegerLiteralExpression(literal).ToExpression
 
-        FloatLiteralExpression.Reference =
+        FloatLiteralExpression.Rule =
             From literal In FloatLiteral
             Select New FloatLiteralExpression(literal).ToExpression
 
-        NumericLiteralExpression.Reference =
+        NumericLiteralExpression.Rule =
             IntegerLiteralExpression Or FloatLiteralExpression
 
-        BooleanLiteralExpression.Reference =
-            From literal In (TrueKeyword.AsParser() Or FalseKeyword.AsParser())
+        BooleanLiteralExpression.Rule =
+            From literal In (TrueKeyword.AsTerminal() Or FalseKeyword.AsTerminal())
             Select New BooleanLiteralExpression(literal).ToExpression
 
-        ReferenceExpression.Reference =
+        ReferenceExpression.Rule =
             From id In ReferenceIdentifier
             Select New ReferenceExpression(id).ToExpression
 
-        NewArrayExpression.Reference =
+        NewArrayExpression.Rule =
             From _new In NewKeyword
             From type In TypeName
             From _lbk In LeftBrck
@@ -643,14 +653,14 @@ Public Class NotBasicParser
             From _rbk In RightBrck
             Select New NewArrayExpression(_new.Span, _lbk.Span, _rbk.Span, type, length).ToExpression
 
-        PrimaryExpression.Reference =
+        PrimaryExpression.Rule =
             NumericLiteralExpression Or
             BooleanLiteralExpression Or
             ReferenceExpression Or
             NewArrayExpression Or
             Expression.PackedBy(LeftPth, RightPth)
 
-        CallExpression.Reference =
+        CallExpression.Rule =
             From _lph In LeftPth
             From lb In LineTerminator.Optional()
             From arguments In ArgumentList
@@ -658,7 +668,7 @@ Public Class NotBasicParser
             From _rph In RightPth
             Select New Func(Of Expression, Expression)(Function(callable) New CallExpression(callable, arguments))
 
-        BracketExpression.Reference =
+        BracketExpression.Rule =
             From _lbk In LeftBrck
             From lb In LineTerminator.Optional()
             From arguments In ArgumentList
@@ -672,7 +682,7 @@ Public Class NotBasicParser
             Select If(follow Is Nothing, exp, follow(exp))
 
         ' unary expressions
-        UnaryExpression.Reference =
+        UnaryExpression.Rule =
             basicExpression Or
             (From op In MinusSymbol
             From exp In UnaryExpression
@@ -685,7 +695,7 @@ Public Class NotBasicParser
             Select New UnaryExpression(op.Span, ExpressionOp.Not, exp).ToExpression)
 
         'binary expressions
-        FactorExpression.Reference = UnaryExpression
+        FactorExpression.Rule = UnaryExpression
 
         'multiplicative * / mod
         Dim termRest =
@@ -702,7 +712,7 @@ Public Class NotBasicParser
             From factor In FactorExpression
             Select New With {.Op = ExpressionOp.Modulo, .Right = factor})
 
-        TermExpression.Reference =
+        TermExpression.Rule =
             From factor In FactorExpression
             From rest In termRest.Many
             Select rest.Aggregate(factor, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -718,24 +728,25 @@ Public Class NotBasicParser
             From term In TermExpression
             Select New With {.Op = ExpressionOp.Substraction, .Right = term})
 
-        ShiftingExpression.Reference =
+        ShiftingExpression.Rule =
             From term In TermExpression
             From rest In shiftingRest.Many
             Select rest.Aggregate(term, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
 
         'shifting >> <<
+        'TODO: Error Code
         Dim comparandRest =
            (From op In ShiftLeft
            From lb In LineTerminator.Optional()
            From shifting In ShiftingExpression
            Select New With {.Op = ExpressionOp.ShiftLeft, .Right = shifting}) Or
            (From g1 In GreaterSymbol
-           From g2 In GreaterSymbol.Where(Function(g) g.PrefixTrivia.Count = 0)
+           From g2 In GreaterSymbol Where g2.PrefixTrivia.Count = 0
            From lb In LineTerminator.Optional()
            From shifting In ShiftingExpression
            Select New With {.Op = ExpressionOp.ShiftRight, .Right = shifting})
 
-        ComparandExpression.Reference =
+        ComparandExpression.Rule =
             From shifting In ShiftingExpression
             From rest In comparandRest.Many
             Select rest.Aggregate(shifting, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -759,7 +770,7 @@ Public Class NotBasicParser
             From comparand In ComparandExpression
             Select New With {.Op = ExpressionOp.LessEqual, .Right = comparand})
 
-        ComparisonExpression.Reference =
+        ComparisonExpression.Rule =
             From comparand In ComparandExpression
             From rest In comparisonRest.Many
             Select rest.Aggregate(comparand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -776,7 +787,7 @@ Public Class NotBasicParser
             From comparison In ComparisonExpression
             Select New With {.Op = ExpressionOp.NotEqual, .Right = comparison})
 
-        EqualityExpression.Reference =
+        EqualityExpression.Rule =
             From comparison In ComparisonExpression
             From rest In equalityRest.Many
             Select rest.Aggregate(comparison, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -788,7 +799,7 @@ Public Class NotBasicParser
             From equality In EqualityExpression
             Select New With {.Op = ExpressionOp.And, .Right = equality}
 
-        AndExpression.Reference =
+        AndExpression.Rule =
             From equality In EqualityExpression
             From rest In andRest.Many
             Select rest.Aggregate(equality, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -800,7 +811,7 @@ Public Class NotBasicParser
             From andoperand In AndExpression
             Select New With {.Op = ExpressionOp.Xor, .Right = andoperand}
 
-        XorExpression.Reference =
+        XorExpression.Rule =
             From andoperand In AndExpression
             From rest In xorRest.Many
             Select rest.Aggregate(andoperand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
@@ -812,14 +823,14 @@ Public Class NotBasicParser
             From xoroperand In XorExpression
             Select New With {.Op = ExpressionOp.Or, .Right = xoroperand}
 
-        OrExpression.Reference =
+        OrExpression.Rule =
             From xoroperand In XorExpression
             From rest In orRest.Many
             Select rest.Aggregate(xoroperand, Function(f, r) New BinaryExpression(r.Op, f, r.Right))
 
-        Expression.Reference = OrExpression
+        Expression.Rule = OrExpression
 
-        ArgumentList.Reference =
+        ArgumentList.Rule =
             From list In Expression.Many(Comma.Concat(LineTerminator.Optional()))
             Select New ArgumentList(list.Select(Function(exp) New Argument(exp)))
 

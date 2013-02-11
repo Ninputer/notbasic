@@ -13,7 +13,7 @@ fun Foo(a, b)
 end
 
 fun Bar()
-    Foo(a + 1, 
+    Foo(a +* 1, 
         b - 2)
 
     a = 
@@ -38,7 +38,17 @@ end
 ]]>
         Dim s = parser.Parse(code.Value)
 
-        Stop
+        ReportErrors(em)
+    End Sub
+
+    Sub ReportErrors(errorManager As CompilationErrorManager)
+
+        If (errorManager.Errors.Count > 0) Then
+
+            For Each er In errorManager.Errors.OrderBy(Function(e) e.ErrorPosition.StartLocation.CharIndex)
+                System.Console.WriteLine(er.ToString())
+            Next
+        End If
     End Sub
 
 End Module
