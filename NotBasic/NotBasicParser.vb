@@ -901,4 +901,43 @@ Public Class NotBasicParser
         'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
         Return Program
     End Function
+
+    Private m_scannerCreationTime As Long
+    Public ReadOnly Property ScannerCreationTime() As Long
+        Get
+            Return m_scannerCreationTime
+        End Get
+    End Property
+
+
+    Protected Overrides Function OnCreateScannerInfo() As ScannerInfo
+        Dim sw As New Stopwatch()
+
+        sw.Start()
+        Dim scannerInfo = MyBase.OnCreateScannerInfo()
+        sw.Stop()
+
+        m_scannerCreationTime = sw.ElapsedMilliseconds
+
+        Return scannerInfo
+    End Function
+
+    Private m_parserCreationTime As Long
+    Public ReadOnly Property ParserCreationTime() As Long
+        Get
+            Return m_parserCreationTime
+        End Get
+    End Property
+
+    Protected Overrides Function OnCreateTransitionTable() As Parsers.Generator.TransitionTable
+        Dim sw As New Stopwatch()
+
+        sw.Start()
+        Dim transitionTable = MyBase.OnCreateTransitionTable()
+        sw.Stop()
+
+        m_parserCreationTime = sw.ElapsedMilliseconds
+
+        Return transitionTable
+    End Function
 End Class

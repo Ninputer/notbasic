@@ -31,12 +31,15 @@ fun Bar()
         c = 0
     end
 
-    do while 1
+    do while true
         a = 0
     loop
 end
 ]]>
         Dim s = parser.Parse(code.Value)
+
+        System.Console.WriteLine("Scanner creation time: {0}ms", parser.ScannerCreationTime)
+        System.Console.WriteLine("Parser creation time: {0}ms", parser.ParserCreationTime)
 
         ReportErrors(em)
     End Sub
