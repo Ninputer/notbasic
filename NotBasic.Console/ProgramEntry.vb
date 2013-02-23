@@ -9,6 +9,10 @@ Module ProgramEntry
 
         Dim code = <![CDATA[
 fun Foo(a, b)
+    return Test()
+end
+
+fun Test()
     return 0
 end
 

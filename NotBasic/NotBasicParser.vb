@@ -411,8 +411,7 @@ Public Class NotBasicParser
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
             Select terminator.Span
 
-        'Line continuation
-        Dim LC = LineTerminator.Optional()
+        Dim LineContinuation = LineTerminator.Optional()
 
         'Statement terminator
         Dim ST = StatementTerminator.Many1()
@@ -467,7 +466,7 @@ Public Class NotBasicParser
         '=======================================================================
 
         ParameterList.Rule =
-           ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LC))
+           ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
 
         ParameterDeclaration.Rule =
             From did In DeclaringIdentifier
@@ -478,9 +477,9 @@ Public Class NotBasicParser
             From keyword In FunctionKeyword
             From name In DeclaringIdentifier
             From _lpth In LeftPth
-            From _nl1 In LC
+            From _nl1 In LineContinuation
             From paramlist In ParameterList
-            From _nl2 In LC
+            From _nl2 In LineContinuation
             From _rpth In RightPth
             From _st In ST
             Select New FunctionDeclaration(keyword.Span, name, paramlist)
@@ -515,14 +514,14 @@ Public Class NotBasicParser
 
         ReturnStatement.Rule =
             From keyword In ReturnKeyword
-            From _nl1 In LineTerminator.Optional
+            From _lc In LineContinuation
             From returnValue In Expression.Optional()
             Select DirectCast(New ReturnStatement(keyword.Span, returnValue), Statement)
 
         AssignmentStatement.Rule =
             From id In ReferenceIdentifier
             From _eq In EqualSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From value In Expression
             Select DirectCast(New AssignmentStatement(id, value), Statement)
 
@@ -646,9 +645,9 @@ Public Class NotBasicParser
             From _new In NewKeyword
             From type In TypeName
             From _lbk In LeftBrck
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From length In Expression
-            From lb2 In LineTerminator.Optional()
+            From _lc2 In LineContinuation
             From _rbk In RightBrck
             Select New NewArrayExpression(_new.Span, _lbk.Span, _rbk.Span, type, length).ToExpression
 
@@ -662,18 +661,18 @@ Public Class NotBasicParser
         CallExpression.Rule =
             From callable In PrimaryExpression
             From _lph In LeftPth
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From arguments In ArgumentList
-            From lb2 In LineTerminator.Optional()
+            From _lc2 In LineContinuation
             From _rph In RightPth
             Select New CallExpression(callable, arguments).ToExpression()
 
         BracketExpression.Rule =
             From indexable In PrimaryExpression
             From _lbk In LeftBrck
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From arguments In ArgumentList
-            From lb2 In LineTerminator.Optional()
+            From _lc2 In LineContinuation
             From _rbk In RightBrck
             Select New BracketExpression(indexable, arguments).ToExpression()
 
@@ -695,209 +694,119 @@ Public Class NotBasicParser
         'binary expressions
         FactorExpression.Rule = UnaryExpression
 
-        'multiplicative * / mod
-        'Dim termRest =
-        '    (From op In Asterisk
-        '    From lb In LineTerminator.Optional()
-        '    From factor In FactorExpression
-        '    Select New With {.Op = ExpressionOp.Multiplication, .Right = factor}) Or
-        '    (From op In Slash
-        '    From lb In LineTerminator.Optional()
-        '    From factor In FactorExpression
-        '    Select New With {.Op = ExpressionOp.Divition, .Right = factor}) Or
-        '    (From op In ModKeyword
-        '    From lb In LineTerminator.Optional()
-        '    From factor In FactorExpression
-        '    Select New With {.Op = ExpressionOp.Modulo, .Right = factor})
-
         TermExpression.Rule =
             FactorExpression Or
             (From left In TermExpression
             From op In Asterisk
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In FactorExpression
             Select New BinaryExpression(ExpressionOp.Multiplication, left, right).ToExpression()) Or
             (From left In TermExpression
             From op In Slash
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In FactorExpression
             Select New BinaryExpression(ExpressionOp.Divition, left, right).ToExpression()) Or
             (From left In TermExpression
             From op In ModKeyword
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In FactorExpression
             Select New BinaryExpression(ExpressionOp.Modulo, left, right).ToExpression())
-
-        'additive + -
-        'Dim shiftingRest =
-        '    (From op In PlusSymbol
-        '    From lb In LineTerminator.Optional()
-        '    From term In TermExpression
-        '    Select New With {.Op = ExpressionOp.Addition, .Right = term}) Or
-        '    (From op In MinusSymbol
-        '    From lb In LineTerminator.Optional()
-        '    From term In TermExpression
-        '    Select New With {.Op = ExpressionOp.Substraction, .Right = term})
 
         ShiftingExpression.Rule =
             TermExpression Or
             (From left In ShiftingExpression
             From op In PlusSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In TermExpression
             Select New BinaryExpression(ExpressionOp.Addition, left, right).ToExpression()) Or
             (From left In ShiftingExpression
             From op In MinusSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In TermExpression
             Select New BinaryExpression(ExpressionOp.Minus, left, right).ToExpression())
-
-        'shifting >> <<
-        'TODO: Error Code
-        'Dim comparandRest =
-        '   (From op In ShiftLeft
-        '   From lb In LineTerminator.Optional()
-        '   From shifting In ShiftingExpression
-        '   Select New With {.Op = ExpressionOp.ShiftLeft, .Right = shifting}) Or
-        '   (From g1 In GreaterSymbol
-        '   From g2 In GreaterSymbol Where g2.PrefixTrivia.Count = 0
-        '   From lb In LineTerminator.Optional()
-        '   From shifting In ShiftingExpression
-        '   Select New With {.Op = ExpressionOp.ShiftRight, .Right = shifting})
 
         ComparandExpression.Rule =
             ShiftingExpression Or
             (From left In ComparandExpression
             From op In ShiftLeft
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ShiftingExpression
             Select New BinaryExpression(ExpressionOp.ShiftLeft, left, right).ToExpression()) Or
             (From left In ComparandExpression
             From g1 In GreaterSymbol
             From g2 In GreaterSymbol Where Grammar.Check(g2.PrefixTrivia.Count = 0, ErrorCode.RightShiftSymbolError, g2.Span)
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ShiftingExpression
             Select New BinaryExpression(ExpressionOp.ShiftRight, left, right).ToExpression())
-
-        'comparison > >= < <=
-        'Dim comparisonRest =
-        '    (From op In GreaterSymbol
-        '    From lb In LineTerminator.Optional()
-        '    From comparand In ComparandExpression
-        '    Select New With {.Op = ExpressionOp.Greater, .Right = comparand}) Or
-        '    (From op In GreaterEqual
-        '    From lb In LineTerminator.Optional()
-        '    From comparand In ComparandExpression
-        '    Select New With {.Op = ExpressionOp.GreaterEqual, .Right = comparand}) Or
-        '    (From op In LessSymbol
-        '    From lb In LineTerminator.Optional()
-        '    From comparand In ComparandExpression
-        '    Select New With {.Op = ExpressionOp.Less, .Right = comparand}) Or
-        '    (From op In LessEqual
-        '    From lb In LineTerminator.Optional()
-        '    From comparand In ComparandExpression
-        '    Select New With {.Op = ExpressionOp.LessEqual, .Right = comparand})
 
         ComparisonExpression.Rule =
             ComparandExpression Or
             (From left In ComparisonExpression
             From op In GreaterSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparandExpression
             Select New BinaryExpression(ExpressionOp.Greater, left, right).ToExpression()) Or
             (From left In ComparisonExpression
             From op In GreaterEqual
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparandExpression
             Select New BinaryExpression(ExpressionOp.GreaterEqual, left, right).ToExpression()) Or
             (From left In ComparisonExpression
             From op In LessSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparandExpression
             Select New BinaryExpression(ExpressionOp.Less, left, right).ToExpression()) Or
             (From left In ComparisonExpression
             From op In LessEqual
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparandExpression
             Select New BinaryExpression(ExpressionOp.LessEqual, left, right).ToExpression())
-
-
-        'equality =  <>
-        'Dim equalityRest =
-        '    (From op In EqualSymbol
-        '    From lb In LineTerminator.Optional()
-        '    From comparison In ComparisonExpression
-        '    Select New With {.Op = ExpressionOp.Equal, .Right = comparison}) Or
-        '    (From op In NotEqual
-        '    From lb In LineTerminator.Optional()
-        '    From comparison In ComparisonExpression
-        '    Select New With {.Op = ExpressionOp.NotEqual, .Right = comparison})
 
         EqualityExpression.Rule =
             ComparisonExpression Or
             (From left In EqualityExpression
             From op In EqualSymbol
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.Equal, left, right).ToExpression()) Or
             (From left In EqualityExpression
             From op In NotEqual
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToExpression())
-
-        'and
-        'Dim andRest =
-        '    From op In AndKeyword
-        '    From lb In LineTerminator.Optional()
-        '    From equality In EqualityExpression
-        '    Select New With {.Op = ExpressionOp.And, .Right = equality}
 
         AndExpression.Rule =
             EqualityExpression Or
             From left In AndExpression
             From op In AndKeyword
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In EqualityExpression
             Select New BinaryExpression(ExpressionOp.And, left, right).ToExpression()
-
-        'xor
-        'Dim xorRest =
-        '    From op In XorKeyword
-        '    From lb In LineTerminator.Optional()
-        '    From andoperand In AndExpression
-        '    Select New With {.Op = ExpressionOp.Xor, .Right = andoperand}
 
         XorExpression.Rule =
             AndExpression Or
             From left In XorExpression
             From op In XorKeyword
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In AndExpression
             Select New BinaryExpression(ExpressionOp.Xor, left, right).ToExpression()
-
-        'or
-        'Dim orRest =
-        '    From op In OrKeyword
-        '    From lb In LineTerminator.Optional()
-        '    From xoroperand In XorExpression
-        '    Select New With {.Op = ExpressionOp.Or, .Right = xoroperand}
 
         OrExpression.Rule =
             XorExpression Or
             From left In OrExpression
             From op In OrKeyword
-            From lb In LineTerminator.Optional()
+            From _lc In LineContinuation
             From right In XorExpression
             Select New BinaryExpression(ExpressionOp.Or, left, right).ToExpression()
 
         Expression.Rule = OrExpression
 
         ArgumentList.Rule =
-            From list In Expression.Many(Comma.Concat(LineTerminator.Optional()))
+            From list In Expression.Many(Comma.Concat(LineContinuation))
             Select New ArgumentList(list.Select(Function(exp) New Argument(exp)))
 
         ScannerInfo.CurrentLexerIndex = m_keywordLexerIndex
+
         'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
         Return Program
     End Function
