@@ -481,7 +481,7 @@ Public Class NotBasicParser
 
         TypeSpecifier.Rule =
             From _colon In Colon
-            From _nl In LC
+            From _nl In LineContinuation
             From spTypeName In TypeName
             Select New TypeSpecifier(spTypeName)
 
