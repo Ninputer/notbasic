@@ -1,5 +1,5 @@
 ﻿
-Class PrimitiveTypeName
+Public Class PrimitiveTypeName
     Inherits TypeName
 
 

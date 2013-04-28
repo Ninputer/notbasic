@@ -354,6 +354,7 @@ Public Class NotBasicParser
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
+    Private TypeSpecifier As New Production(Of TypeSpecifier)
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
@@ -448,7 +449,12 @@ Public Class NotBasicParser
              Select DirectCast(New QualifiedTypeName(DirectCast(qualifier, QualifiedTypeName), id), TypeName))
 
         PrimitiveTypeName.Rule =
-            From inttype In IntKeyword
+            From typeKeyword In (IntKeyword.AsTerminal() Or
+                             BoolKeyword.AsTerminal() Or
+                             SingleKeyword.AsTerminal() Or
+                             DoubleKeyword.AsTerminal() Or
+                             ShortKeyword.AsTerminal() Or
+                             ByteKeyword.AsTerminal())
             Select DirectCast(New PrimitiveTypeName(), TypeName)
 
 
@@ -471,7 +477,14 @@ Public Class NotBasicParser
 
         ParameterDeclaration.Rule =
             From did In DeclaringIdentifier
-            Select New ParameterDeclaration(did)
+            From typesp In TypeSpecifier.Optional()
+            Select New ParameterDeclaration(did, typesp)
+
+        TypeSpecifier.Rule =
+            From _colon In Colon
+            From _nl In LC
+            From spTypeName In TypeName
+            Select New TypeSpecifier(spTypeName)
 
         'FunctionDeclaration := fun name ( arglist ) <st>
         FunctionDeclaration.Rule =
@@ -482,8 +495,9 @@ Public Class NotBasicParser
             From paramlist In ParameterList
             From _nl2 In LC
             From _rpth In RightPth
+            From returnTypeSp In TypeSpecifier.Optional()
             From _st In ST
-            Select New FunctionDeclaration(keyword.Span, name, paramlist)
+            Select New FunctionDeclaration(keyword.Span, name, paramlist, returnTypeSp)
 
         FunctionDefinition.Rule =
             From decl In FunctionDeclaration

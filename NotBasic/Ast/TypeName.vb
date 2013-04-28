@@ -1,4 +1,4 @@
 ﻿
-Class TypeName
+Public Class TypeName
 
 End Class

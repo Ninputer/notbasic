@@ -1,5 +1,5 @@
 ﻿
-Class QualifiedTypeName
+Public Class QualifiedTypeName
     Inherits TypeName
 
     Private _id As UnifiedIdentifer

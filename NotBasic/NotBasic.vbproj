@@ -115,6 +115,7 @@
     <Compile Include="Ast\SyntaxTreeNode.vb" />
     <Compile Include="Ast\ReferenceExpression.vb" />
     <Compile Include="Ast\UnaryExpression.vb" />
+    <Compile Include="Ast\TypeSpecifier.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,8 +12,12 @@ fun Foo(a, b)
     return 0
 end
 
+fun FooType(a:int, b:int):int
+    return 0
+end
+
 fun Bar()
-    Foo(a +* 1, 
+    Foo(a + 1, 
         b - 2)
 
     a = 
@@ -23,7 +27,7 @@ fun Bar()
     'if 1 then a = 0
     'if 1 then a = 0  else b = 0
     if a - a * -b =
-        d > > 1
+        d >> 1
         a = 0
     elseif a xor b or c and d
         b = 0
