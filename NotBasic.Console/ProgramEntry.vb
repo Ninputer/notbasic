@@ -12,7 +12,7 @@ fun Foo(a, b)
     return Test()
 end
 
-fun Test(x:myType)
+fun Test<T, U< >>(x:myType<int>)
     return 0
 end
 
@@ -33,7 +33,7 @@ fun Bar()
     if a - a * -b =
         d >> 1
         a = 0
-    elseif a xor b or c and d
+    elseif a <> b xor b or c and d
         b = 0
     else
         c = 0

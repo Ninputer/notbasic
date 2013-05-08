@@ -6,6 +6,7 @@
     Public Const MissingToken As Integer = 2001
     Public Const UnexpectedToken As Integer = 2002
     Public Const RightShiftSymbolError As Integer = 2010
+    Public Const NotEqualSymbolError As Integer = 2011
 
     Public Const GeneralSyntaxError As Integer = 2999
 

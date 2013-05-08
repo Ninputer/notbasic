@@ -57,6 +57,9 @@ Public Class NotBasicParser
     Private XorKeyword As Token
     Private ModKeyword As Token
     Private CastKeyword As Token
+    Private ConceptKeyword As Token
+    Private ConcreteKeyword As Token
+    Private WhereKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -95,7 +98,6 @@ Public Class NotBasicParser
     Private GreaterSymbol As Token '>
     Private LessEqual As Token '<=
     Private GreaterEqual As Token '>=
-    Private NotEqual As Token '<>
     Private ShiftLeft As Token '<<
 
     Private LineTerminator As Token
@@ -268,7 +270,6 @@ Public Class NotBasicParser
             GreaterSymbol = .DefineToken(Symbol(">"c))
             LessEqual = .DefineToken(Literal("<="))
             GreaterEqual = .DefineToken(Literal(">="))
-            NotEqual = .DefineToken(Literal("<>"))
             ShiftLeft = .DefineToken(Literal("<<"))
 
             LineTerminator = .DefineToken(lineTerminatorChar Or Literal(vbCrLf), "line terminator")
@@ -325,6 +326,9 @@ Public Class NotBasicParser
             XorKeyword = .DefineToken(Literal("xor"))
             ModKeyword = .DefineToken(Literal("mod"))
             CastKeyword = .DefineToken(Literal("cast"))
+            ConceptKeyword = .DefineToken(Literal("concept"))
+            ConcreteKeyword = .DefineToken(Literal("concrete"))
+            WhereKeyword = .DefineToken(Literal("where"))
         End With
 
         'define contextual keywords for procedure declaration
@@ -360,8 +364,12 @@ Public Class NotBasicParser
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
-    
 
+    Private ConceptDeclaration As New Production(Of ConceptDeclaration)
+    Private ConstraintClauses As New Production(Of IEnumerable(Of ConceptConstraintClause))
+    Private ConceptConstraintClause As New Production(Of ConceptConstraintClause)
+    Private TypeConstraintClause As New Production(Of TypeConstraintClause)
+    Private ConcreteDeclaration As New Production(Of ConcreteDeclaration)
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
@@ -413,6 +421,7 @@ Public Class NotBasicParser
         MyBase.OnDefineParserErrors(errorDefinition, errorManager)
 
         errorManager.DefineError(ErrorCode.RightShiftSymbolError, 0, CompilationStage.Parsing, "Spaces between >> operator are not allowed")
+        errorManager.DefineError(ErrorCode.NotEqualSymbolError, 0, CompilationStage.Parsing, "Spaces between <> operator are not allowed")
     End Sub
 
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
@@ -450,7 +459,37 @@ Public Class NotBasicParser
         'ArrayTypeName Or
 
         QualifiedTypeName.Rule =
-            (From id In ReferenceIdentifier Select DirectCast(New QualifiedTypeName(id), TypeName))
+            From id In ReferenceIdentifier
+            From typeArgs In TypeArguments.Optional
+            Select DirectCast(New QualifiedTypeName(id, typeArgs), TypeName)
+
+        '<Type, Type,...>
+        TypeArguments.Rule =
+            From _lt In LessSymbol
+            From _lc1 In LineContinuation
+            From types In TypeName.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
+            From _lc2 In LineContinuation
+            From _gt In GreaterSymbol
+            Select types
+
+        Dim typeParameterDimension =
+            From _lt In LessSymbol
+            From commas In Comma.AsTerminal().Many()
+            From _gt In GreaterSymbol
+            Select New Nullable(Of Integer)(commas.Count() + 1)
+
+        TypeParameter.Rule =
+            From name In DeclaringIdentifier
+            From dimension In typeParameterDimension.Optional
+            Select New TypeParameter(name, dimension)
+
+        TypeParameters.Rule =
+            From _lt In LessSymbol
+            From _lc1 In LineContinuation
+            From typeParams In TypeParameter.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
+            From _lc2 In LineContinuation
+            From _gt In GreaterSymbol
+            Select typeParams
 
         PrimitiveTypeName.Rule =
             From typeKeyword In (IntKeyword.AsTerminal() Or
@@ -494,6 +533,7 @@ Public Class NotBasicParser
         FunctionDeclaration.Rule =
             From keyword In FunctionKeyword
             From name In DeclaringIdentifier
+            From typeParams In TypeParameters.Optional
             From _lpth In LeftPth
             From _nl1 In LineContinuation
             From paramlist In ParameterList
@@ -501,7 +541,7 @@ Public Class NotBasicParser
             From _rpth In RightPth
             From returnTypeSp In TypeSpecifier.Optional()
             From _st In ST
-            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp)
+            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams)
 
         FunctionDefinition.Rule =
             From decl In FunctionDeclaration
@@ -509,6 +549,42 @@ Public Class NotBasicParser
             From endfun In EndKeyword
             From _st In ST
             Select New FunctionDefinition(decl, statements, endfun.Value.Span)
+
+        '=======================================================================
+        ' Concept declarations
+        '=======================================================================
+
+        ConceptDeclaration.Rule =
+            From _concept In ConceptKeyword
+            From name In DeclaringIdentifier
+            From typeParams In TypeParameters
+            From whereClauses In ConstraintClauses.Optional
+            Select New ConceptDeclaration(_concept.Value.Span, name, typeParams, whereClauses)
+
+        ConstraintClauses.Rule =
+            From _where In WhereKeyword
+            From _lc In LineContinuation
+            From constraints In ConceptConstraintClause.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
+            Select constraints
+
+        ConceptConstraintClause.Rule =
+            From conceptName In ReferenceIdentifier
+            From typeArgs In TypeArguments
+            Select New ConceptConstraintClause(conceptName, typeArgs)
+
+        'TODO: TypeConstraintClause
+
+        ConcreteDeclaration.Rule =
+            From _concrete In ConcreteKeyword
+            From typeParams In TypeParameters.Optional
+            From conceptName In ReferenceIdentifier
+            From typeArgs In TypeArguments
+            From whereClauses In ConstraintClauses.Optional
+            Select New ConcreteDeclaration(_concrete.Value.Span, typeParams, conceptName, typeArgs, whereClauses)
+
+        'TODO: ConceptDefinition
+        'TODO: ConcreteDefinition
+
 
         '=======================================================================
         ' Statements
@@ -796,7 +872,9 @@ Public Class NotBasicParser
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.Equal, left, right).ToExpression()) Or
             (From left In EqualityExpression
-            From op In NotEqual
+            From op_less In LessSymbol
+            From op_greater In GreaterSymbol Where Grammar.Check(op_greater.PrefixTrivia.Count = 0, ErrorCode.NotEqualSymbolError,
+                              New SourceSpan(op_less.Value.Span.StartLocation, op_greater.Value.Span.EndLocation))
             From _lc In LineContinuation
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToExpression())

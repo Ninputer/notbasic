@@ -1,0 +1,4 @@
+﻿
+Class TypeConstraintClause
+
+End Class
