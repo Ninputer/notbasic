@@ -84,6 +84,7 @@
     <Compile Include="Ast\DoLoopStatement.vb" />
     <Compile Include="Ast\ElseBlock.vb" />
     <Compile Include="Ast\ElseIfBlock.vb" />
+    <Compile Include="Ast\CastExpression.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitDoStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
@@ -116,6 +117,7 @@
     <Compile Include="Ast\ReferenceExpression.vb" />
     <Compile Include="Ast\UnaryExpression.vb" />
     <Compile Include="Ast\TypeSpecifier.vb" />
+    <Compile Include="Ast\TypeParameter.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

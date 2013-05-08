@@ -3,20 +3,12 @@ Imports VBF.Compilers
 
 Public Class UnifiedIdentifer
 
-    Private m_identifier As String
-    Private m_span As SourceSpan
+    Private m_identifier As LexemeValue
+    Private m_escaped As Boolean
 
-    Private Sub New(value As String, span As SourceSpan)
-        m_identifier = value
-        m_span = span
+    Public Sub New(id As LexemeValue, escaped As Boolean)
+        m_identifier = id
+        m_escaped = escaped
     End Sub
-
-    Shared Function FromIdentifier(id As Lexeme) As UnifiedIdentifer
-        Return New UnifiedIdentifer(id.Value, id.Span)
-    End Function
-
-    Shared Function FromEscapedIdentifier(eid As Lexeme) As UnifiedIdentifer
-        Return New UnifiedIdentifer(eid.Value.Substring(1), eid.Span)
-    End Function
-
+    
 End Class

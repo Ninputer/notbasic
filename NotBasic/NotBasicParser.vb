@@ -56,6 +56,7 @@ Public Class NotBasicParser
     Private NotKeyword As Token
     Private XorKeyword As Token
     Private ModKeyword As Token
+    Private CastKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -323,6 +324,7 @@ Public Class NotBasicParser
             NotKeyword = .DefineToken(Literal("not"))
             XorKeyword = .DefineToken(Literal("xor"))
             ModKeyword = .DefineToken(Literal("mod"))
+            CastKeyword = .DefineToken(Literal("cast"))
         End With
 
         'define contextual keywords for procedure declaration
@@ -348,13 +350,18 @@ Public Class NotBasicParser
     Private ArrayTypeName As New Production(Of TypeName)
     Private PrimitiveTypeName As New Production(Of TypeName)
     Private QualifiedTypeName As New Production(Of TypeName)
+    Private TypeSpecifier As New Production(Of TypeSpecifier)
+    Private TypeParameter As New Production(Of TypeParameter)
+    Private TypeParameters As New Production(Of IEnumerable(Of TypeParameter))
+    Private TypeArguments As New Production(Of IEnumerable(Of TypeName))
 
     Private Program As New Production(Of CompilationUnit)
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
-    Private TypeSpecifier As New Production(Of TypeSpecifier)
+    
+
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
@@ -380,6 +387,7 @@ Public Class NotBasicParser
     Private OrExpression As New Production(Of Expression)
     Private XorExpression As New Production(Of Expression)
     Private ShiftingExpression As New Production(Of Expression)
+    Private CastExpression As New Production(Of Expression)
     Private UnaryExpression As New Production(Of Expression)
     Private IntegerLiteralExpression As New Production(Of Expression)
     Private FloatLiteralExpression As New Production(Of Expression)
@@ -410,7 +418,7 @@ Public Class NotBasicParser
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
-            Select terminator.Span
+            Select terminator.Value.Span
 
         Dim LineContinuation = LineTerminator.Optional()
 
@@ -423,18 +431,18 @@ Public Class NotBasicParser
 
         DeclaringIdentifier.Rule =
             (From id In Identifier
-            Select UnifiedIdentifer.FromIdentifier(id)) Or
+            Select New UnifiedIdentifer(id.Value, False)) Or
             (From eid In EscapedIdentifier
-            Select UnifiedIdentifer.FromEscapedIdentifier(eid))
+            Select New UnifiedIdentifer(eid.Value, True))
 
         ReferenceIdentifier.Rule =
             DeclaringIdentifier
 
         QualifiedIdentifier.Rule =
             (From id In Identifier.AsTerminal()
-             Select UnifiedIdentifer.FromIdentifier(id)) Or
+             Select New UnifiedIdentifer(id.Value, False)) Or
             (From eid In EscapedIdentifier
-             Select UnifiedIdentifer.FromEscapedIdentifier(eid))
+             Select New UnifiedIdentifer(eid.Value, True))
 
         TypeName.Rule =
             QualifiedTypeName Or
@@ -442,10 +450,7 @@ Public Class NotBasicParser
         'ArrayTypeName Or
 
         QualifiedTypeName.Rule =
-            (From id In ReferenceIdentifier Select DirectCast(New QualifiedTypeName(id), TypeName)) Or
-            (From qualifier In QualifiedTypeName
-             From id In QualifiedIdentifier
-             Select DirectCast(New QualifiedTypeName(DirectCast(qualifier, QualifiedTypeName), id), TypeName))
+            (From id In ReferenceIdentifier Select DirectCast(New QualifiedTypeName(id), TypeName))
 
         PrimitiveTypeName.Rule =
             From typeKeyword In (IntKeyword.AsTerminal() Or
@@ -496,14 +501,14 @@ Public Class NotBasicParser
             From _rpth In RightPth
             From returnTypeSp In TypeSpecifier.Optional()
             From _st In ST
-            Select New FunctionDeclaration(keyword.Span, name, paramlist, returnTypeSp)
+            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp)
 
         FunctionDefinition.Rule =
             From decl In FunctionDeclaration
             From statements In statements
             From endfun In EndKeyword
             From _st In ST
-            Select New FunctionDefinition(decl, statements, endfun.Span)
+            Select New FunctionDefinition(decl, statements, endfun.Value.Span)
 
         '=======================================================================
         ' Statements
@@ -530,7 +535,7 @@ Public Class NotBasicParser
             From keyword In ReturnKeyword
             From _lc In LineContinuation
             From returnValue In Expression.Optional()
-            Select DirectCast(New ReturnStatement(keyword.Span, returnValue), Statement)
+            Select DirectCast(New ReturnStatement(keyword.Value.Span, returnValue), Statement)
 
         AssignmentStatement.Rule =
             From id In ReferenceIdentifier
@@ -552,20 +557,20 @@ Public Class NotBasicParser
                 From _else In ElseKeyword
                 From elseStatement In SingleLineStatement
                 Select elseStatement).Optional
-            Select DirectCast(New IfThenStatement(_if.Span, condition, trueStatement, elsePart), Statement)
+            Select DirectCast(New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart), Statement)
 
         Dim ElseIfBlock =
             From _elseif In ElseIfKeyword
             From condition In Expression
             From _st In ST
             From elseIfTruePart In Statements
-            Select New ElseIfBlock(_elseif.Span, condition, elseIfTruePart)
+            Select New ElseIfBlock(_elseif.Value.Span, condition, elseIfTruePart)
 
         Dim ElseBlock =
             From _else In ElseKeyword
             From _st In ST
             From elsePart In Statements
-            Select New ElseBlock(_else.Span, elsePart)
+            Select New ElseBlock(_else.Value.Span, elsePart)
 
         IfBlockStatement.Rule =
             From _if In IfKeyword
@@ -576,7 +581,7 @@ Public Class NotBasicParser
             From elseBlockOpt In ElseBlock.Optional
             From _end In EndKeyword
             From _st2 In ST
-            Select DirectCast(New IfBlockStatement(_if.Span, _end.Span, condition, truePart, elseIfBlocks, elseBlockOpt), Statement)
+            Select DirectCast(New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt), Statement)
 
         Dim DoLoopForm =
             From _do In DoKeyword
@@ -584,7 +589,7 @@ Public Class NotBasicParser
             From loopBody In Statements
             From _loop In LoopKeyword
             From _st2 In ST
-            Select DoLoopStatement.DoLoopFrom(_do.Span, _loop.Span, loopBody)
+            Select DoLoopStatement.DoLoopFrom(_do.Value.Span, _loop.Value.Span, loopBody)
 
         Dim DoWhileLoopForm =
             From _do In DoKeyword
@@ -594,7 +599,7 @@ Public Class NotBasicParser
             From loopBody In Statements
             From _loop In LoopKeyword
             From _st2 In ST
-            Select DoLoopStatement.DoWhileLoopFrom(_do.Span, _while.Span, _loop.Span, condition, loopBody)
+            Select DoLoopStatement.DoWhileLoopFrom(_do.Value.Span, _while.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoUntilLoopForm =
             From _do In DoKeyword
@@ -604,7 +609,7 @@ Public Class NotBasicParser
             From loopBody In Statements
             From _loop In LoopKeyword
             From _st2 In ST
-            Select DoLoopStatement.DoUntilLoopFrom(_do.Span, _until.Span, _loop.Span, condition, loopBody)
+            Select DoLoopStatement.DoUntilLoopFrom(_do.Value.Span, _until.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoLoopWhileForm =
             From _do In DoKeyword
@@ -614,7 +619,7 @@ Public Class NotBasicParser
             From _while In WhileKeyword
             From condition In Expression
             From _st2 In ST
-            Select DoLoopStatement.DoLoopWhileFrom(_do.Span, _while.Span, _loop.Span, condition, loopBody)
+            Select DoLoopStatement.DoLoopWhileFrom(_do.Value.Span, _while.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoLoopUntilForm =
             From _do In DoKeyword
@@ -624,7 +629,7 @@ Public Class NotBasicParser
             From _until In UntilKeyword
             From condition In Expression
             From _st2 In ST
-            Select DoLoopStatement.DoLoopUntilFrom(_do.Span, _until.Span, _loop.Span, condition, loopBody)
+            Select DoLoopStatement.DoLoopUntilFrom(_do.Value.Span, _until.Value.Span, _loop.Value.Span, condition, loopBody)
 
         DoStatement.Rule =
             DoLoopForm Or
@@ -663,7 +668,7 @@ Public Class NotBasicParser
             From length In Expression
             From _lc2 In LineContinuation
             From _rbk In RightBrck
-            Select New NewArrayExpression(_new.Span, _lbk.Span, _rbk.Span, type, length).ToExpression
+            Select New NewArrayExpression(_new.Value.Span, _lbk.Value.Span, _rbk.Value.Span, type, length).ToExpression
 
         PrimaryExpression.Rule =
             NumericLiteralExpression Or
@@ -697,13 +702,20 @@ Public Class NotBasicParser
             basicExpression Or
             (From op In MinusSymbol
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Span, ExpressionOp.Minus, exp).ToExpression) Or
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Minus, exp).ToExpression) Or
             (From op In PlusSymbol
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Span, ExpressionOp.Plus, exp).ToExpression) Or
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Plus, exp).ToExpression) Or
             (From op In NotKeyword
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Span, ExpressionOp.Not, exp).ToExpression)
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Not, exp).ToExpression) Or
+            CastExpression
+
+        CastExpression.Rule =
+            From op In CastKeyword
+            From typesp In TypeSpecifier.Optional
+            From exp In UnaryExpression
+            Select New CastExpression(op.Value.Span, exp, typesp).ToExpression
 
         'binary expressions
         FactorExpression.Rule = UnaryExpression
@@ -748,7 +760,7 @@ Public Class NotBasicParser
             Select New BinaryExpression(ExpressionOp.ShiftLeft, left, right).ToExpression()) Or
             (From left In ComparandExpression
             From g1 In GreaterSymbol
-            From g2 In GreaterSymbol Where Grammar.Check(g2.PrefixTrivia.Count = 0, ErrorCode.RightShiftSymbolError, g2.Span)
+            From g2 In GreaterSymbol Where Grammar.Check(g2.PrefixTrivia.Count = 0, ErrorCode.RightShiftSymbolError, g2.Value.Span)
             From _lc In LineContinuation
             From right In ShiftingExpression
             Select New BinaryExpression(ExpressionOp.ShiftRight, left, right).ToExpression())

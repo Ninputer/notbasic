@@ -12,7 +12,7 @@ fun Foo(a, b)
     return Test()
 end
 
-fun Test()
+fun Test(x:myType)
     return 0
 end
 

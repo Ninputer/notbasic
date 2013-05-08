@@ -1,4 +1,5 @@
-﻿
+﻿Imports VBF.Compilers
+
 Public Class FunctionDeclaration
     Inherits SyntaxTreeNode
 
@@ -10,14 +11,14 @@ Public Class FunctionDeclaration
     Private _paramlist As IEnumerable(Of ParameterDeclaration)
     Private _returnTypeSp As TypeSpecifier
 
-    Sub New(sourceSpan As Compilers.SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration))
+    Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration))
         If paramlist Is Nothing Then Exit Sub
         m_sourceSpan = sourceSpan
         m_name = name
         m_paramlist = paramlist.ToArray()
     End Sub
 
-    Sub New(sourceSpan As Compilers.SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier)
+    Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier)
         ' TODO: Complete member initialization 
         _sourceSpan = sourceSpan
         _name = name

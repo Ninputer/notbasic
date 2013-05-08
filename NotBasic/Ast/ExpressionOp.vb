@@ -4,6 +4,7 @@
     [Not]
     Plus
     Minus
+    Cast
 
     'binary
     Multiplication
