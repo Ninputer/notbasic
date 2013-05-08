@@ -559,6 +559,7 @@ Public Class NotBasicParser
             From name In DeclaringIdentifier
             From typeParams In TypeParameters
             From whereClauses In ConstraintClauses.Optional
+            From _st In ST
             Select New ConceptDeclaration(_concept.Value.Span, name, typeParams, whereClauses)
 
         ConstraintClauses.Rule =
@@ -580,6 +581,7 @@ Public Class NotBasicParser
             From conceptName In ReferenceIdentifier
             From typeArgs In TypeArguments
             From whereClauses In ConstraintClauses.Optional
+            From _st In ST
             Select New ConcreteDeclaration(_concrete.Value.Span, typeParams, conceptName, typeArgs, whereClauses)
 
         'TODO: ConceptDefinition
