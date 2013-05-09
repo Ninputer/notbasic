@@ -47,6 +47,19 @@ fun Bar()
         a = 0
     loop
 end
+
+concept Functor<F<>>
+    fun fmap<T>(f:func<T, T>):func<F<T>,F<T>>
+end
+
+concept Monad<M<>> where Functor<M>
+    fun unit<U>(a:U):M<U>
+    fun bind<T, U>(m:M<T>, f:func<T, M<U>>):M<U>
+end
+
+concept Comparable<T>
+    fun compare(a:T, b:T):int
+end
 ]]>
         Dim s = parser.Parse(code.Value)
 

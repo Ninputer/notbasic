@@ -1,5 +1,6 @@
 ﻿
 Public Class OperatorDeclaration
+    Inherits Declaration
 
     Private _sourceSpan As Compilers.SourceSpan
     Private _op As Compilers.Scanners.LexemeValue

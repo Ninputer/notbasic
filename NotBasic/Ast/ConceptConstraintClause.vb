@@ -1,5 +1,5 @@
 ﻿
-Class ConceptConstraintClause
+Public Class ConceptConstraintClause
 
     Private _conceptName As UnifiedIdentifer
     Private _types As IEnumerable(Of TypeName)

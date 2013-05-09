@@ -374,10 +374,12 @@ Public Class NotBasicParser
     Private OverloadableOperator As New Production(Of LexemeValue)
 
     Private ConceptDeclaration As New Production(Of ConceptDeclaration)
+    Private ConceptDefinition As New Production(Of ConceptDefinition)
     Private ConstraintClauses As New Production(Of IEnumerable(Of ConceptConstraintClause))
     Private ConceptConstraintClause As New Production(Of ConceptConstraintClause)
     Private TypeConstraintClause As New Production(Of TypeConstraintClause)
     Private ConcreteDeclaration As New Production(Of ConcreteDeclaration)
+    Private ProcedureDeclaration As New Production(Of Declaration)
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
@@ -522,7 +524,8 @@ Public Class NotBasicParser
 
         TopLevelStructure.Rule =
             FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
-            OperatorDefinition.Select(Function(d) d.ToDefinition())
+            OperatorDefinition.Select(Function(d) d.ToDefinition()) Or
+            ConceptDefinition.Select(Function(d) d.ToDefinition())
 
         Program.Rule =
             From _emptylines In StatementTerminator.Many
@@ -635,7 +638,17 @@ Public Class NotBasicParser
             From _st In ST
             Select New ConcreteDeclaration(_concrete.Value.Span, typeParams, conceptName, typeArgs, whereClauses)
 
-        'TODO: ConceptDefinition
+        ConceptDefinition.Rule =
+            From decl In ConceptDeclaration
+            From procedures In ProcedureDeclaration.Many()
+            From _end In EndKeyword
+            From _st In ST
+            Select New ConceptDefinition(decl, procedures, _end.Value.Span)
+
+        ProcedureDeclaration.Rule =
+            FunctionDeclaration.Select(Function(d) d.ToDeclaration()) Or
+            OperatorDeclaration.Select(Function(d) d.ToDeclaration())
+
         'TODO: ConcreteDefinition
 
 

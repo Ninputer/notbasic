@@ -1,7 +1,7 @@
 ﻿Imports VBF.Compilers
 
 Public Class FunctionDeclaration
-    Inherits SyntaxTreeNode
+    Inherits Declaration
 
     Private m_sourceSpan As Compilers.SourceSpan
     Private m_name As UnifiedIdentifer

@@ -1,5 +1,5 @@
 ﻿
-Class ConceptDeclaration
+Public Class ConceptDeclaration
 
     Private _sourceSpan As Compilers.SourceSpan
     Private _name As UnifiedIdentifer
