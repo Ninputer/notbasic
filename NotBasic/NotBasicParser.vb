@@ -433,6 +433,12 @@ Public Class NotBasicParser
     End Sub
 
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
+        'TODO: 1. concept/concret definition
+        'TODO: 2. user defined type
+        'TODO: 3: for/foreach statement
+        'TODO: 4: try/catch statement
+        'TODO: 5: lambda expression
+
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
             Select terminator.Value.Span
