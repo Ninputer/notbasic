@@ -33,7 +33,7 @@ Public Class NotBasicParser
     Private TrueKeyword As Token
     Private FalseKeyword As Token
     Private NewKeyword As Token
-    Private SubKeyword As Token
+    Private OperatorKeyword As Token
     Private FunctionKeyword As Token
     Private ReturnKeyword As Token
     Private ExitKeyword As Token
@@ -302,7 +302,7 @@ Public Class NotBasicParser
             TrueKeyword = .DefineToken(Literal("true"))
             FalseKeyword = .DefineToken(Literal("false"))
             NewKeyword = .DefineToken(Literal("new"))
-            SubKeyword = .DefineToken(Literal("sub"))
+            OperatorKeyword = .DefineToken(Literal("operator"))
             FunctionKeyword = .DefineToken(Literal("fun"))
             ReturnKeyword = .DefineToken(Literal("return"))
             ExitKeyword = .DefineToken(Literal("exit"))
@@ -360,10 +360,18 @@ Public Class NotBasicParser
     Private TypeArguments As New Production(Of IEnumerable(Of TypeName))
 
     Private Program As New Production(Of CompilationUnit)
+    Private TopLevelStructure As New Production(Of Definition)
+
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
+
+    Private OperatorDeclaration As New Production(Of OperatorDeclaration)
+    Private OperatorDefinition As New Production(Of OperatorDefinition)
+    Private ShiftRightOperator As New Production(Of LexemeValue)
+    Private NotEqualOperator As New Production(Of LexemeValue)
+    Private OverloadableOperator As New Production(Of LexemeValue)
 
     Private ConceptDeclaration As New Production(Of ConceptDeclaration)
     Private ConstraintClauses As New Production(Of IEnumerable(Of ConceptConstraintClause))
@@ -506,10 +514,14 @@ Public Class NotBasicParser
         ' Program Entry
         '=======================================================================
 
+        TopLevelStructure.Rule =
+            FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
+            OperatorDefinition.Select(Function(d) d.ToDefinition())
+
         Program.Rule =
             From _emptylines In StatementTerminator.Many
-            From functions In FunctionDefinition.Many()
-            Select New CompilationUnit(functions)
+            From definitions In TopLevelStructure.Many()
+            Select New CompilationUnit(definitions)
 
         '=======================================================================
         ' Functions
@@ -551,7 +563,40 @@ Public Class NotBasicParser
             Select New FunctionDefinition(decl, statements, endfun.Value.Span)
 
         '=======================================================================
-        ' Concept declarations
+        ' Operators
+        '=======================================================================
+
+        OverloadableOperator.Rule =
+            NotEqualOperator Or ShiftRightOperator Or
+            From op In Grammar.Union(MinusSymbol, PlusSymbol, NotKeyword, CastKeyword,
+                                     Asterisk, Slash, ModKeyword, ShiftLeft,
+                                     GreaterSymbol, GreaterEqual, LessSymbol, LessEqual, EqualSymbol,
+                                     AndKeyword, XorKeyword, OrKeyword)
+            Select op.Value
+
+        'OperatorDeclaration := operator op ( arglist ) <st>
+        OperatorDeclaration.Rule =
+            From _operator In OperatorKeyword
+            From op In OverloadableOperator
+            From typeParams In TypeParameters.Optional
+            From _lpth In LeftPth
+            From _nl1 In LineContinuation
+            From paramlist In ParameterList
+            From _nl2 In LineContinuation
+            From _rpth In RightPth
+            From returnTypeSp In TypeSpecifier.Optional()
+            From _st In ST
+            Select New OperatorDeclaration(_operator.Value.Span, op, paramlist, returnTypeSp, typeParams)
+
+        OperatorDefinition.Rule =
+            From decl In OperatorDeclaration
+            From statements In statements
+            From endfun In EndKeyword
+            From _st In ST
+            Select New OperatorDefinition(decl, statements, endfun.Value.Span)
+
+        '=======================================================================
+        ' Concepts
         '=======================================================================
 
         ConceptDeclaration.Rule =
@@ -829,6 +874,13 @@ Public Class NotBasicParser
             From right In TermExpression
             Select New BinaryExpression(ExpressionOp.Minus, left, right).ToExpression())
 
+        ShiftRightOperator.Rule =
+            From g1 In GreaterSymbol
+            From g2 In GreaterSymbol
+            Let op = New LexemeValue(g1.Value.Content & g2.Value.Content, New SourceSpan(g1.Value.Span.StartLocation, g2.Value.Span.EndLocation))
+            Where Grammar.Check(g2.PrefixTrivia.Count = 0, ErrorCode.RightShiftSymbolError, op.Span)
+            Select op
+
         ComparandExpression.Rule =
             ShiftingExpression Or
             (From left In ComparandExpression
@@ -837,8 +889,7 @@ Public Class NotBasicParser
             From right In ShiftingExpression
             Select New BinaryExpression(ExpressionOp.ShiftLeft, left, right).ToExpression()) Or
             (From left In ComparandExpression
-            From g1 In GreaterSymbol
-            From g2 In GreaterSymbol Where Grammar.Check(g2.PrefixTrivia.Count = 0, ErrorCode.RightShiftSymbolError, g2.Value.Span)
+            From _shr In ShiftRightOperator
             From _lc In LineContinuation
             From right In ShiftingExpression
             Select New BinaryExpression(ExpressionOp.ShiftRight, left, right).ToExpression())
@@ -866,6 +917,13 @@ Public Class NotBasicParser
             From right In ComparandExpression
             Select New BinaryExpression(ExpressionOp.LessEqual, left, right).ToExpression())
 
+        NotEqualOperator.Rule =
+            From lt In LessSymbol
+            From gt In GreaterSymbol
+            Let op = New LexemeValue(lt.Value.Content & gt.Value.Content, New SourceSpan(lt.Value.Span.StartLocation, gt.Value.Span.EndLocation))
+            Where Grammar.Check(gt.PrefixTrivia.Count = 0, ErrorCode.NotEqualSymbolError, op.Span)
+            Select op
+
         EqualityExpression.Rule =
             ComparisonExpression Or
             (From left In EqualityExpression
@@ -874,9 +932,7 @@ Public Class NotBasicParser
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.Equal, left, right).ToExpression()) Or
             (From left In EqualityExpression
-            From op_less In LessSymbol
-            From op_greater In GreaterSymbol Where Grammar.Check(op_greater.PrefixTrivia.Count = 0, ErrorCode.NotEqualSymbolError,
-                              New SourceSpan(op_less.Value.Span.StartLocation, op_greater.Value.Span.EndLocation))
+            From _neq In NotEqualOperator            
             From _lc In LineContinuation
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToExpression())
@@ -913,7 +969,7 @@ Public Class NotBasicParser
 
         ScannerInfo.CurrentLexerIndex = m_keywordLexerIndex
 
-        'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
+            'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
         Return Program
     End Function
 

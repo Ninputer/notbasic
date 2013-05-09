@@ -12,7 +12,11 @@ fun Foo(a, b)
     return Test()
 end
 
-fun Test<T, U< >>(x:myType<int>)
+operator+(a:int, b:int):List<int>
+    return a
+end
+
+fun Test<T, U<>>(x:myType<int>)
     return 0
 end
 

@@ -87,7 +87,8 @@
     <Compile Include="Ast\CastExpression.vb" />
     <Compile Include="Ast\ConceptDeclaration.vb" />
     <Compile Include="Ast\ConceptConstraintClause.vb" />
-    <Compile Include="ConcreteDeclaration.vb" />
+    <Compile Include="Ast\ConcreteDeclaration.vb" />
+    <Compile Include="Ast\Definition.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitDoStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
@@ -122,6 +123,8 @@
     <Compile Include="Ast\TypeSpecifier.vb" />
     <Compile Include="Ast\TypeParameter.vb" />
     <Compile Include="Ast\TypeConstraintClause.vb" />
+    <Compile Include="Ast\OperatorDeclaration.vb" />
+    <Compile Include="Ast\OperatorDefinition.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

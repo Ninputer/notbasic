@@ -1,6 +1,6 @@
 ﻿
 Public Class FunctionDefinition
-    Inherits SyntaxTreeNode
+    Inherits Definition
 
     Private m_decl As FunctionDeclaration
     Private m_sourceSpan As Compilers.SourceSpan
