@@ -91,6 +91,7 @@
     <Compile Include="Ast\Definition.vb" />
     <Compile Include="Ast\Declaration.vb" />
     <Compile Include="Ast\ConceptDefinition.vb" />
+    <Compile Include="Ast\ConcreteDefinition.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitDoStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
@@ -113,7 +114,9 @@
     <Compile Include="Ast\CallExpression.vb" />
     <Compile Include="Ast\ExpressionStatement.vb" />
     <Compile Include="Ast\FloatLiteralExpression.vb" />
+    <Compile Include="Ast\FieldDefinition.vb" />
     <Compile Include="KeywordManager.vb" />
+    <Compile Include="Ast\MemberAccessExpression.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="Ast\NewArrayExpression.vb" />
     <Compile Include="NotBasicParser.vb" />
@@ -127,6 +130,7 @@
     <Compile Include="Ast\TypeConstraintClause.vb" />
     <Compile Include="Ast\OperatorDeclaration.vb" />
     <Compile Include="Ast\OperatorDefinition.vb" />
+    <Compile Include="Ast\TypeDefinition.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,5 +1,6 @@
 ﻿
-Class ConcreteDeclaration
+Public Class ConcreteDeclaration
+    Inherits Declaration
 
     Private _sourceSpan As Compilers.SourceSpan
     Private _typeParams As IEnumerable(Of TypeParameter)

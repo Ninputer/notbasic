@@ -16,12 +16,12 @@ operator+(a:int, b:int):List<int>
     return a
 end
 
-fun Test<T, U<>>(x:myType<int>)
+fun Test<T, U<>>(x:myType<int>) where Functor<U>
     return 0
 end
 
 fun FooType(a:int, b:int):int
-    return 0
+    return Foo<int>(1, 2)
 end
 
 fun Bar()
@@ -58,7 +58,24 @@ concept Monad<M<>> where Functor<M>
 end
 
 concept Comparable<T>
-    fun compare(a:T, b:T):int
+    fun Compare(a:T, b:T):int
+end
+
+concrete Comparable<int>
+    fun Compare(a,b)
+        return a - b
+    end
+end
+
+concrete<T> Comparable<Point<T>>
+    fun Compare(a,b)
+        return a.X - b.X
+    end
+end
+
+type Point<T>
+    X:T
+    Y:T
 end
 ]]>
         Dim s = parser.Parse(code.Value)

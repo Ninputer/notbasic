@@ -60,6 +60,7 @@ Public Class NotBasicParser
     Private ConceptKeyword As Token
     Private ConcreteKeyword As Token
     Private WhereKeyword As Token
+    Private TypeKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -99,6 +100,7 @@ Public Class NotBasicParser
     Private LessEqual As Token '<=
     Private GreaterEqual As Token '>=
     Private ShiftLeft As Token '<<
+    Private Dot As Token '.
 
     Private LineTerminator As Token
 
@@ -271,6 +273,7 @@ Public Class NotBasicParser
             LessEqual = .DefineToken(Literal("<="))
             GreaterEqual = .DefineToken(Literal(">="))
             ShiftLeft = .DefineToken(Literal("<<"))
+            Dot = .DefineToken(Symbol("."c))
 
             LineTerminator = .DefineToken(lineTerminatorChar Or Literal(vbCrLf), "line terminator")
         End With
@@ -329,6 +332,7 @@ Public Class NotBasicParser
             ConceptKeyword = .DefineToken(Literal("concept"))
             ConcreteKeyword = .DefineToken(Literal("concrete"))
             WhereKeyword = .DefineToken(Literal("where"))
+            TypeKeyword = .DefineToken(Literal("type"))
         End With
 
         'define contextual keywords for procedure declaration
@@ -362,6 +366,10 @@ Public Class NotBasicParser
     Private Program As New Production(Of CompilationUnit)
     Private TopLevelStructure As New Production(Of Definition)
 
+    Private TypeDefinition As New Production(Of TypeDefinition)
+    Private FieldDefinition As New Production(Of FieldDefinition)
+
+
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
@@ -379,7 +387,9 @@ Public Class NotBasicParser
     Private ConceptConstraintClause As New Production(Of ConceptConstraintClause)
     Private TypeConstraintClause As New Production(Of TypeConstraintClause)
     Private ConcreteDeclaration As New Production(Of ConcreteDeclaration)
+    Private ConcreteDefinition As New Production(Of ConcreteDefinition)
     Private ProcedureDeclaration As New Production(Of Declaration)
+    Private ProcedureDefinition As New Production(Of Definition)
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
@@ -413,7 +423,7 @@ Public Class NotBasicParser
     Private BooleanLiteralExpression As New Production(Of Expression)
     Private NewArrayExpression As New Production(Of Expression)
     Private ReferenceExpression As New Production(Of Expression)
-
+    Private MemberAccessExpression As New Production(Of Expression)
     Private BracketExpression As New Production(Of Expression)
     Private CallExpression As New Production(Of Expression)
 
@@ -435,11 +445,12 @@ Public Class NotBasicParser
     End Sub
 
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
-        'TODO: 1. concept/concret definition
-        'TODO: 2. user defined type
+        'TODO: 1. concept/concret definition  DONE
+        'TODO: 2. user defined type DONE
         'TODO: 3: for/foreach statement
         'TODO: 4: try/catch statement
         'TODO: 5: lambda expression
+        'TODO: 6: select case statement
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -499,6 +510,7 @@ Public Class NotBasicParser
             From dimension In typeParameterDimension.Optional
             Select New TypeParameter(name, dimension)
 
+        '<identifier, identifier<>>
         TypeParameters.Rule =
             From _lt In LessSymbol
             From _lc1 In LineContinuation
@@ -525,12 +537,35 @@ Public Class NotBasicParser
         TopLevelStructure.Rule =
             FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
             OperatorDefinition.Select(Function(d) d.ToDefinition()) Or
-            ConceptDefinition.Select(Function(d) d.ToDefinition())
+            ConceptDefinition.Select(Function(d) d.ToDefinition()) Or
+            ConcreteDefinition.Select(Function(d) d.ToDefinition()) Or
+            TypeDefinition.Select(Function(d) d.ToDefinition())
 
         Program.Rule =
             From _emptylines In StatementTerminator.Many
             From definitions In TopLevelStructure.Many()
             Select New CompilationUnit(definitions)
+
+        '=======================================================================
+        ' Types
+        '=======================================================================
+
+        FieldDefinition.Rule =
+            From fieldName In DeclaringIdentifier
+            From typeSp In TypeSpecifier
+            From _st In ST
+            Select New FieldDefinition(fieldName, typeSp)
+
+        TypeDefinition.Rule =
+            From _type In TypeKeyword
+            From typeName In DeclaringIdentifier
+            From typeParams In TypeParameters.Optional
+            From whereClauses In ConstraintClauses.Optional
+            From _st1 In ST
+            From fields In FieldDefinition.Many
+            From _end In EndKeyword
+            From _st2 In ST
+            Select New TypeDefinition(_type.Value.Span, typeName, typeParams, whereClauses, fields, _end.Value.Span)
 
         '=======================================================================
         ' Functions
@@ -561,8 +596,9 @@ Public Class NotBasicParser
             From _nl2 In LineContinuation
             From _rpth In RightPth
             From returnTypeSp In TypeSpecifier.Optional()
+            From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams)
+            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
 
         FunctionDefinition.Rule =
             From decl In FunctionDeclaration
@@ -594,8 +630,9 @@ Public Class NotBasicParser
             From _nl2 In LineContinuation
             From _rpth In RightPth
             From returnTypeSp In TypeSpecifier.Optional()
+            From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New OperatorDeclaration(_operator.Value.Span, op, paramlist, returnTypeSp, typeParams)
+            Select New OperatorDeclaration(_operator.Value.Span, op, paramlist, returnTypeSp, typeParams, whereClauses)
 
         OperatorDefinition.Rule =
             From decl In OperatorDeclaration
@@ -649,8 +686,16 @@ Public Class NotBasicParser
             FunctionDeclaration.Select(Function(d) d.ToDeclaration()) Or
             OperatorDeclaration.Select(Function(d) d.ToDeclaration())
 
-        'TODO: ConcreteDefinition
+        ProcedureDefinition.Rule =
+            FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
+            OperatorDefinition.Select(Function(d) d.ToDefinition())
 
+        ConcreteDefinition.Rule =
+            From decl In ConcreteDeclaration
+            From procedures In ProcedureDefinition.Many()
+            From _end In EndKeyword
+            From _st In ST
+            Select New ConcreteDefinition(decl, procedures, _end.Value.Span)
 
         '=======================================================================
         ' Statements
@@ -687,7 +732,7 @@ Public Class NotBasicParser
             Select DirectCast(New AssignmentStatement(id, value), Statement)
 
         ExpressionStatement.Rule =
-            From exp In NewArrayExpression Or CallExpression
+            From exp In CallExpression
             Select DirectCast(New ExpressionStatement(exp), Statement)
 
         IfThenStatement.Rule =
@@ -800,7 +845,15 @@ Public Class NotBasicParser
 
         ReferenceExpression.Rule =
             From id In ReferenceIdentifier
-            Select New ReferenceExpression(id).ToExpression
+            From typeArgs In TypeArguments.Optional
+            Select New ReferenceExpression(id, typeArgs).ToExpression
+
+        MemberAccessExpression.Rule =
+            From exp In PrimaryExpression
+            From _dot In Dot
+            From memberName In ReferenceIdentifier
+            From typeArgs In TypeArguments.Optional
+            Select New MemberAccessExpression(exp, memberName, typeArgs).ToExpression()
 
         NewArrayExpression.Rule =
             From _new In NewKeyword
@@ -817,6 +870,7 @@ Public Class NotBasicParser
             BooleanLiteralExpression Or
             ReferenceExpression Or
             NewArrayExpression Or
+            MemberAccessExpression Or
             Expression.PackedBy(LeftPth, RightPth)
 
         CallExpression.Rule =
@@ -951,7 +1005,7 @@ Public Class NotBasicParser
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.Equal, left, right).ToExpression()) Or
             (From left In EqualityExpression
-            From _neq In NotEqualOperator            
+            From _neq In NotEqualOperator
             From _lc In LineContinuation
             From right In ComparisonExpression
             Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToExpression())
@@ -988,7 +1042,7 @@ Public Class NotBasicParser
 
         ScannerInfo.CurrentLexerIndex = m_keywordLexerIndex
 
-            'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
+        'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
         Return Program
     End Function
 
