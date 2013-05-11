@@ -14,7 +14,6 @@ Public Class NotBasicParser
     Private m_propertyLexerIndex As Integer
 
     'keywords
-    Private AsKeyword As Token
     Private StringKeyword As Token
     Private IntKeyword As Token
     Private ShortKeyword As Token
@@ -29,7 +28,6 @@ Public Class NotBasicParser
     Private ElseKeyword As Token
     Private ElseIfKeyword As Token
     Private EndKeyword As Token
-    Private PrintKeyword As Token
     Private TrueKeyword As Token
     Private FalseKeyword As Token
     Private NewKeyword As Token
@@ -40,7 +38,8 @@ Public Class NotBasicParser
     Private TryKeyword As Token
     Private CatchKeyword As Token
     Private FinallyKeyword As Token
-    Private WhenKeyword As Token
+    Private ThrowKeyword As Token
+    Private EachKeyword As Token
     Private DoKeyword As Token
     Private WhileKeyword As Token
     Private UntilKeyword As Token
@@ -61,6 +60,9 @@ Public Class NotBasicParser
     Private ConcreteKeyword As Token
     Private WhereKeyword As Token
     Private TypeKeyword As Token
+    Private ToKeyword As Token
+    Private StepKeyword As Token
+    Private InKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -286,7 +288,6 @@ Public Class NotBasicParser
 
         '========== Define reserved keywords ========== 
         With keywordLexer
-            AsKeyword = .DefineToken(Literal("as"))
             StringKeyword = .DefineToken(Literal("string"))
             IntKeyword = .DefineToken(Literal("int"))
             ShortKeyword = .DefineToken(Literal("short"))
@@ -301,7 +302,6 @@ Public Class NotBasicParser
             ElseKeyword = .DefineToken(Literal("else"))
             ElseIfKeyword = .DefineToken(Literal("elseif"))
             EndKeyword = .DefineToken(Literal("end"))
-            PrintKeyword = .DefineToken(Literal("print"))
             TrueKeyword = .DefineToken(Literal("true"))
             FalseKeyword = .DefineToken(Literal("false"))
             NewKeyword = .DefineToken(Literal("new"))
@@ -312,7 +312,8 @@ Public Class NotBasicParser
             TryKeyword = .DefineToken(Literal("try"))
             CatchKeyword = .DefineToken(Literal("catch"))
             FinallyKeyword = .DefineToken(Literal("finally"))
-            WhenKeyword = .DefineToken(Literal("when"))
+            ThrowKeyword = .DefineToken(Literal("throw"))
+            EachKeyword = .DefineToken(Literal("each"))
             DoKeyword = .DefineToken(Literal("do"))
             WhileKeyword = .DefineToken(Literal("while"))
             UntilKeyword = .DefineToken(Literal("until"))
@@ -333,6 +334,9 @@ Public Class NotBasicParser
             ConcreteKeyword = .DefineToken(Literal("concrete"))
             WhereKeyword = .DefineToken(Literal("where"))
             TypeKeyword = .DefineToken(Literal("type"))
+            ToKeyword = .DefineToken(Literal("to"))
+            StepKeyword = .DefineToken(Literal("step"))
+            InKeyword = .DefineToken(Literal("in"))
         End With
 
         'define contextual keywords for procedure declaration
@@ -403,6 +407,11 @@ Public Class NotBasicParser
     Private IfThenStatement As New Production(Of Statement)
     Private IfBlockStatement As New Production(Of Statement)
     Private DoStatement As New Production(Of Statement)
+    Private TryStatement As New Production(Of Statement)
+    Private ForStatement As New Production(Of Statement)
+    Private ForEachStatement As New Production(Of Statement)
+    Private ExitStatement As New Production(Of Statement)
+    Private ContinueStatement As New Production(Of Statement)
 
     Private Expression As New Production(Of Expression)
     Private PrimaryExpression As New Production(Of Expression)
@@ -430,7 +439,6 @@ Public Class NotBasicParser
     Private ArgumentList As New Production(Of ArgumentList)
 
     Protected Overrides Sub OnDefineParserErrors(errorDefinition As SyntaxErrors, errorManager As CompilationErrorManager)
-
         With errorDefinition
             .LexicalErrorId = ErrorCode.InvalidToken
             .TokenMissingId = ErrorCode.MissingToken
@@ -447,10 +455,13 @@ Public Class NotBasicParser
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
         'TODO: 1. concept/concret definition  DONE
         'TODO: 2. user defined type DONE
-        'TODO: 3: for/foreach statement
-        'TODO: 4: try/catch statement
-        'TODO: 5: lambda expression
+        'TODO: 3: for/foreach statement DONE
+        'TODO: 4: try/catch statement DONE
+        'TODO: 5: lambda expression/function type
         'TODO: 6: select case statement
+        'TODO: 7. if then else statement ambiguity gramma
+        'TODO: 8. String literals
+        'TODO: 9. array access ambiguity gramma
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -565,7 +576,7 @@ Public Class NotBasicParser
             From fields In FieldDefinition.Many
             From _end In EndKeyword
             From _st2 In ST
-            Select New TypeDefinition(_type.Value.Span, typeName, typeParams, whereClauses, fields, _end.Value.Span)
+            Select New TypeDefinition(_type.Value.Span, _end.Value.Span, typeName, typeParams, whereClauses, fields)
 
         '=======================================================================
         ' Functions
@@ -712,28 +723,33 @@ Public Class NotBasicParser
             ReturnStatement Or
             AssignmentStatement Or
             IfThenStatement Or
-            ExpressionStatement
+            ExpressionStatement Or
+            ContinueStatement Or
+            ExitStatement
 
         BlockStatement.Rule =
             IfBlockStatement Or
-            DoStatement
+            DoStatement Or
+            ForStatement Or
+            ForEachStatement Or
+            TryStatement
 
         ReturnStatement.Rule =
             From keyword In ReturnKeyword
             From _lc In LineContinuation
             From returnValue In Expression.Optional()
-            Select DirectCast(New ReturnStatement(keyword.Value.Span, returnValue), Statement)
+            Select New ReturnStatement(keyword.Value.Span, returnValue).ToStatement
 
         AssignmentStatement.Rule =
             From id In ReferenceIdentifier
             From _eq In EqualSymbol
             From _lc In LineContinuation
             From value In Expression
-            Select DirectCast(New AssignmentStatement(id, value), Statement)
+            Select New AssignmentStatement(id, value).ToStatement
 
         ExpressionStatement.Rule =
             From exp In CallExpression
-            Select DirectCast(New ExpressionStatement(exp), Statement)
+            Select New ExpressionStatement(exp).ToStatement
 
         IfThenStatement.Rule =
             From _if In IfKeyword
@@ -744,7 +760,7 @@ Public Class NotBasicParser
                 From _else In ElseKeyword
                 From elseStatement In SingleLineStatement
                 Select elseStatement).Optional
-            Select DirectCast(New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart), Statement)
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToStatement
 
         Dim ElseIfBlock =
             From _elseif In ElseIfKeyword
@@ -768,7 +784,7 @@ Public Class NotBasicParser
             From elseBlockOpt In ElseBlock.Optional
             From _end In EndKeyword
             From _st2 In ST
-            Select DirectCast(New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt), Statement)
+            Select New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt).ToStatement
 
         Dim DoLoopForm =
             From _do In DoKeyword
@@ -824,6 +840,79 @@ Public Class NotBasicParser
             DoUntilLoopForm Or
             DoLoopWhileForm Or
             DoLoopUntilForm
+
+        ContinueStatement.Rule =
+            From _continue In ContinueKeyword
+            From loopStruct In Grammar.Union(ForKeyword, DoKeyword)
+            Select New ContinueStatement(_continue.Value.Span, loopStruct.Value).ToStatement
+
+        ExitStatement.Rule =
+            From _exit In ExitKeyword
+            From exitStruct In Grammar.Union(ForKeyword, DoKeyword, TryKeyword, SelectKeyword, FunctionKeyword)
+            Select New ExitStatement(_exit.Value.Span, exitStruct.Value).ToStatement
+
+        Dim CatchWithTypeBlock =
+            From _catch In CatchKeyword
+            From exceptVar In DeclaringIdentifier.Optional
+            From exceptType In TypeSpecifier
+            From _st In ST
+            From catchBody In Statements
+            Select New CatchBlock(_catch.Value.Span, exceptVar, exceptType, catchBody)
+
+        Dim CatchBlock =
+            From _catch In CatchKeyword
+            From _st In ST
+            From catchBody In Statements
+            Select New CatchBlock(_catch.Value.Span, Nothing, Nothing, catchBody)
+
+        Dim FinallyBlock =
+            From _finally In FinallyKeyword
+            From _st In ST
+            From finallyBody In Statements
+            Select New FinallyBlock(_finally.Value.Span, finallyBody)
+
+        TryStatement.Rule =
+            From _try In TryKeyword
+            From _st1 In ST
+            From tryBody In Statements
+            From typeCatches In CatchWithTypeBlock.Many
+            From _catchBlock In CatchBlock.Optional
+            From _finallyBlock In FinallyBlock.Optional
+            From _end In EndKeyword
+            From _st2 In ST
+            Select New TryStatement(_try.Value.Span, _end.Value.Span, tryBody, typeCatches, _catchBlock, _finallyBlock).ToStatement
+
+        ForStatement.Rule =
+            From _for In ForKeyword
+            From loopVar In DeclaringIdentifier
+            From typeSp In TypeSpecifier.Optional
+            From _eq In EqualSymbol
+            From _lc In LineContinuation
+            From fromExp In Expression
+            From _to In ToKeyword
+            From _lc2 In LineContinuation
+            From toExp In Expression
+            From stepExp In Expression.PrefixedBy(StepKeyword).Optional
+            From _st1 In ST
+            From forBody In Statements
+            From _next In NextKeyword
+            From _st2 In ST
+            Select New ForStatement(_for.Value.Span, _next.Value.Span, loopVar, typeSp, fromExp, toExp, stepExp, forBody).ToStatement
+
+        ForEachStatement.Rule =
+            From _for In ForKeyword
+            From _each In EachKeyword
+            From loopVar In DeclaringIdentifier
+            From typeSp In TypeSpecifier.Optional
+            From _in In InKeyword
+            From _lc In LineContinuation
+            From enumExp In Expression
+            From _st1 In ST
+            From forBody In Statements
+            From _next In NextKeyword
+            From _st2 In ST
+            Select New ForEachStatement(_for.Value.Span, _each.Value.Span, loopVar, typeSp, enumExp, forBody).ToStatement
+
 
         '=======================================================================
         ' Expressions

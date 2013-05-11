@@ -46,6 +46,24 @@ fun Bar()
     do while true
         a = 0
     loop
+
+    for i = 0 to 10
+        for j = 100 to 3 step -2
+            continue for
+        next
+        exit for
+    next
+
+    try
+        x = y - 1
+    catch e:SomeException
+        print(e)
+    catch:AnotherException
+        for each x in y
+        next
+    catch
+        return 0
+    end
 end
 
 concept Functor<F<>>
@@ -59,6 +77,7 @@ end
 
 concept Comparable<T>
     fun Compare(a:T, b:T):int
+    operator<(a:T, b:T):boolean
 end
 
 concrete Comparable<int>
@@ -70,6 +89,10 @@ end
 concrete<T> Comparable<Point<T>>
     fun Compare(a,b)
         return a.X - b.X
+    end
+
+    operator<(a, b)
+        return Compare(a,b) < 0
     end
 end
 
