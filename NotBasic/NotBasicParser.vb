@@ -366,6 +366,7 @@ Public Class NotBasicParser
     Private TypeParameter As New Production(Of TypeParameter)
     Private TypeParameters As New Production(Of IEnumerable(Of TypeParameter))
     Private TypeArguments As New Production(Of IEnumerable(Of TypeName))
+    Private FunctionTypeName As New Production(Of TypeName)
 
     Private Program As New Production(Of CompilationUnit)
     Private TopLevelStructure As New Production(Of Definition)
@@ -435,6 +436,8 @@ Public Class NotBasicParser
     Private MemberAccessExpression As New Production(Of Expression)
     Private BracketExpression As New Production(Of Expression)
     Private CallExpression As New Production(Of Expression)
+    Private FreeFormCallExpression As New Production(Of Expression)
+    Private LambdaExpression As New Production(Of Expression)
 
     Private ArgumentList As New Production(Of ArgumentList)
 
@@ -453,15 +456,16 @@ Public Class NotBasicParser
     End Sub
 
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
-        'TODO: 1. concept/concret definition  DONE
-        'TODO: 2. user defined type DONE
-        'TODO: 3: for/foreach statement DONE
-        'TODO: 4: try/catch statement DONE
-        'TODO: 5: lambda expression/function type
-        'TODO: 6: select case statement
-        'TODO: 7. if then else statement ambiguity gramma
-        'TODO: 8. String literals
-        'TODO: 9. array access ambiguity gramma
+        'DONE: concept/concret definition
+        'DONE: user defined type
+        'DONE: for/foreach statement
+        'DONE: try/catch statement
+        'TODO: lambda expression/function type
+        'TODO: select case statement
+        'TODO: if then else statement ambiguity gramma
+        'TODO: String literals
+        'TODO: array access ambiguity gramma
+        'TODO: infix call expression
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -493,7 +497,8 @@ Public Class NotBasicParser
 
         TypeName.Rule =
             QualifiedTypeName Or
-            PrimitiveTypeName
+            PrimitiveTypeName Or
+            FunctionTypeName
         'ArrayTypeName Or
 
         QualifiedTypeName.Rule =
@@ -531,14 +536,27 @@ Public Class NotBasicParser
             Select typeParams
 
         PrimitiveTypeName.Rule =
-            From typeKeyword In (IntKeyword.AsTerminal() Or
-                             BoolKeyword.AsTerminal() Or
-                             SingleKeyword.AsTerminal() Or
-                             DoubleKeyword.AsTerminal() Or
-                             ShortKeyword.AsTerminal() Or
-                             ByteKeyword.AsTerminal())
-            Select DirectCast(New PrimitiveTypeName(), TypeName)
+            From typeKeyword In Grammar.Union(IntKeyword,
+                                              BoolKeyword,
+                                              SingleKeyword,
+                                              DoubleKeyword,
+                                              ShortKeyword,
+                                              ByteKeyword,
+                                              LongKeyword,
+                                              CharKeyword,
+                                              StringKeyword)
+            Select DirectCast(New PrimitiveTypeName(typeKeyword.Value), TypeName)
 
+        'fun(paramType)returnType
+        FunctionTypeName.Rule =
+            From _fun In FunctionKeyword
+            From _lpth In LeftPth
+            From _lc1 In LineContinuation
+            From paramTypes In TypeName.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
+            From _lc2 In LineContinuation
+            From _rpth In RightPth
+            From returnType In TypeName.Optional
+            Select DirectCast(New FunctionTypeName(_fun.Value.Span, paramTypes, returnType), TypeName)
 
 
         '=======================================================================

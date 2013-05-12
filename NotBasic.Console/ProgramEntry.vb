@@ -12,6 +12,11 @@ fun Foo(a, b)
     return Test()
 end
 
+fun Bar(f:fun(int)int, g:fun())
+    x = f(2)
+    return g()
+end
+
 operator+(a:int, b:int):List<int>
     return a
 end
@@ -67,12 +72,12 @@ fun Bar()
 end
 
 concept Functor<F<>>
-    fun fmap<T>(f:func<T, T>):func<F<T>,F<T>>
+    fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
 
 concept Monad<M<>> where Functor<M>
     fun unit<U>(a:U):M<U>
-    fun bind<T, U>(m:M<T>, f:func<T, M<U>>):M<U>
+    fun bind<T, U>(m:M<T>, f:fun(T)M<U>):M<U>
 end
 
 concept Comparable<T>

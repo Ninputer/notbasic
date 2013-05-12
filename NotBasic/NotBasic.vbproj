@@ -118,8 +118,9 @@
     <Compile Include="Ast\FloatLiteralExpression.vb" />
     <Compile Include="Ast\FieldDefinition.vb" />
     <Compile Include="Ast\FinallyBlock.vb" />
-    <Compile Include="ForEachStatement.vb" />
-    <Compile Include="ForStatement.vb" />
+    <Compile Include="Ast\ForEachStatement.vb" />
+    <Compile Include="Ast\ForStatement.vb" />
+    <Compile Include="Ast\FunctionTypeName.vb" />
     <Compile Include="KeywordManager.vb" />
     <Compile Include="Ast\MemberAccessExpression.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -136,7 +137,7 @@
     <Compile Include="Ast\OperatorDeclaration.vb" />
     <Compile Include="Ast\OperatorDefinition.vb" />
     <Compile Include="Ast\TypeDefinition.vb" />
-    <Compile Include="TryStatement.vb" />
+    <Compile Include="Ast\TryStatement.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
