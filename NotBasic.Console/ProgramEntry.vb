@@ -71,6 +71,22 @@ fun Bar()
     end
 end
 
+fun Lambdas()
+    f1 = x => x + 1
+    f2 = x:int => x + 1
+    f3 = ()=>print(a)
+    f4 = (x, y)=>x + y
+    f5 = (x:string)=>x
+    f6 = x.bind(a=>y.bind(b=>unit(a+b)))
+
+    f7 = x => { return x + 1 }
+    f8 = x => { y = x - 1; return y + x }
+    f9 = (x:int, y:int) =>
+    {
+        return x + y
+    }
+end
+
 concept Functor<F<>>
     fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
