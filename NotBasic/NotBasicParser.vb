@@ -103,6 +103,7 @@ Public Class NotBasicParser
     Private GreaterEqual As Token '>=
     Private ShiftLeft As Token '<<
     Private Dot As Token '.
+    Private Arrow As Token '=>
 
     Private LineTerminator As Token
 
@@ -276,6 +277,7 @@ Public Class NotBasicParser
             GreaterEqual = .DefineToken(Literal(">="))
             ShiftLeft = .DefineToken(Literal("<<"))
             Dot = .DefineToken(Symbol("."c))
+            Arrow = .DefineToken(Literal("=>"))
 
             LineTerminator = .DefineToken(lineTerminatorChar Or Literal(vbCrLf), "line terminator")
         End With
@@ -400,6 +402,7 @@ Public Class NotBasicParser
     Private Statement As New Production(Of Statement)
     Private SingleLineStatement As New Production(Of Statement)
     Private BlockStatement As New Production(Of Statement)
+    Private StatementsBlock As New Production(Of IEnumerable(Of Statement))
 
     Private ReturnStatement As New Production(Of Statement)
     Private AssignmentStatement As New Production(Of Statement)
@@ -437,6 +440,8 @@ Public Class NotBasicParser
     Private BracketExpression As New Production(Of Expression)
     Private CallExpression As New Production(Of Expression)
     Private LambdaExpression As New Production(Of Expression)
+    Private LambdaBody As New Production(Of LambdaBody)
+    Private LambdaSignature As New Production(Of LambdaSignature)
 
     Private ArgumentList As New Production(Of ArgumentList)
 
@@ -459,12 +464,14 @@ Public Class NotBasicParser
         'DONE: user defined type
         'DONE: for/foreach statement
         'DONE: try/catch statement
-        'TODO: lambda expression/function type
+        'DONE: lambda expression/function type
         'TODO: select case statement
         'TODO: if then else statement ambiguity gramma
         'TODO: String literals
         'TODO: array access ambiguity gramma
         'TODO: infix call expression
+        'TODO: enum
+        'TODO: concept default implementation
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -730,10 +737,18 @@ Public Class NotBasicParser
         '=======================================================================
 
         Statements.Rule =
-            Statement.Many()
+            Statement.Many(ST).SuffixedBy(ST.Optional)
+
+        StatementsBlock.Rule =
+            From _lbr In LeftBrce
+            From _st1 In ST.Optional()
+            From s In Statements
+            From _st2 In ST.Optional()
+            From _rbr In RightBrce
+            Select s
 
         Statement.Rule =
-            SingleLineStatement.SuffixedBy(ST) Or
+            SingleLineStatement Or
             BlockStatement
 
         SingleLineStatement.Rule =
@@ -800,7 +815,6 @@ Public Class NotBasicParser
             From elseIfBlocks In ElseIfBlock.Many
             From elseBlockOpt In ElseBlock.Optional
             From _end In EndKeyword
-            From _st2 In ST
             Select New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt).ToStatement
 
         Dim DoLoopForm =
@@ -808,7 +822,6 @@ Public Class NotBasicParser
             From _st In ST
             From loopBody In Statements
             From _loop In LoopKeyword
-            From _st2 In ST
             Select DoLoopStatement.DoLoopFrom(_do.Value.Span, _loop.Value.Span, loopBody)
 
         Dim DoWhileLoopForm =
@@ -818,7 +831,6 @@ Public Class NotBasicParser
             From _st In ST
             From loopBody In Statements
             From _loop In LoopKeyword
-            From _st2 In ST
             Select DoLoopStatement.DoWhileLoopFrom(_do.Value.Span, _while.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoUntilLoopForm =
@@ -828,7 +840,6 @@ Public Class NotBasicParser
             From _st In ST
             From loopBody In Statements
             From _loop In LoopKeyword
-            From _st2 In ST
             Select DoLoopStatement.DoUntilLoopFrom(_do.Value.Span, _until.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoLoopWhileForm =
@@ -838,7 +849,6 @@ Public Class NotBasicParser
             From _loop In LoopKeyword
             From _while In WhileKeyword
             From condition In Expression
-            From _st2 In ST
             Select DoLoopStatement.DoLoopWhileFrom(_do.Value.Span, _while.Value.Span, _loop.Value.Span, condition, loopBody)
 
         Dim DoLoopUntilForm =
@@ -848,7 +858,6 @@ Public Class NotBasicParser
             From _loop In LoopKeyword
             From _until In UntilKeyword
             From condition In Expression
-            From _st2 In ST
             Select DoLoopStatement.DoLoopUntilFrom(_do.Value.Span, _until.Value.Span, _loop.Value.Span, condition, loopBody)
 
         DoStatement.Rule =
@@ -896,7 +905,6 @@ Public Class NotBasicParser
             From _catchBlock In CatchBlock.Optional
             From _finallyBlock In FinallyBlock.Optional
             From _end In EndKeyword
-            From _st2 In ST
             Select New TryStatement(_try.Value.Span, _end.Value.Span, tryBody, typeCatches, _catchBlock, _finallyBlock).ToStatement
 
         ForStatement.Rule =
@@ -913,7 +921,6 @@ Public Class NotBasicParser
             From _st1 In ST
             From forBody In Statements
             From _next In NextKeyword
-            From _st2 In ST
             Select New ForStatement(_for.Value.Span, _next.Value.Span, loopVar, typeSp, fromExp, toExp, stepExp, forBody).ToStatement
 
         ForEachStatement.Rule =
@@ -927,7 +934,6 @@ Public Class NotBasicParser
             From _st1 In ST
             From forBody In Statements
             From _next In NextKeyword
-            From _st2 In ST
             Select New ForEachStatement(_for.Value.Span, _each.Value.Span, loopVar, typeSp, enumExp, forBody).ToStatement
 
 
@@ -1140,7 +1146,38 @@ Public Class NotBasicParser
             From right In XorExpression
             Select New BinaryExpression(ExpressionOp.Or, left, right).ToExpression()
 
-        Expression.Rule = OrExpression
+        Dim FreeLambdaParameter = ParameterDeclaration
+        Dim LambdaParameterList =
+            From _lph In LeftPth
+            From _lc1 In LineContinuation
+            From params In ParameterList
+            From _lc2 In LineContinuation
+            From _rph In RightPth
+            Select params
+
+        Dim LambdaSignatureParams =
+            LambdaParameterList Or
+            From p In FreeLambdaParameter
+            Select DirectCast({p}, IEnumerable(Of ParameterDeclaration))
+
+        LambdaSignature.Rule =
+            From params In LambdaSignatureParams
+            Select New LambdaSignature(params)
+
+        LambdaExpression.Rule =
+            From signature In LambdaSignature
+            From _arrow In Arrow
+            From _lc In LineContinuation
+            From body In LambdaBody
+            Select New LambdaExpression(signature, body).ToExpression
+
+        LambdaBody.Rule =
+            (From exp In Expression
+             Select New ExpressionLambdaBody(exp).ToLambdaBody) Or
+            (From block In StatementsBlock
+             Select New BlockLambdaBody(block).ToLambdaBody)
+
+        Expression.Rule = OrExpression Or LambdaExpression
 
         ArgumentList.Rule =
             From list In Expression.Many(Comma.Concat(LineContinuation))

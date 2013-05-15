@@ -123,6 +123,9 @@
     <Compile Include="Ast\FunctionTypeName.vb" />
     <Compile Include="KeywordManager.vb" />
     <Compile Include="Ast\MemberAccessExpression.vb" />
+    <Compile Include="Ast\LambdaBody.vb" />
+    <Compile Include="Ast\LambdaExpression.vb" />
+    <Compile Include="Ast\LambdaSignature.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="Ast\NewArrayExpression.vb" />
     <Compile Include="NotBasicParser.vb" />
