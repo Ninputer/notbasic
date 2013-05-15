@@ -436,7 +436,6 @@ Public Class NotBasicParser
     Private MemberAccessExpression As New Production(Of Expression)
     Private BracketExpression As New Production(Of Expression)
     Private CallExpression As New Production(Of Expression)
-    Private FreeFormCallExpression As New Production(Of Expression)
     Private LambdaExpression As New Production(Of Expression)
 
     Private ArgumentList As New Production(Of ArgumentList)
