@@ -3,11 +3,11 @@
 Class BooleanLiteralExpression
     Inherits Expression
 
-    Private _literal As Lexeme
+    Private _lexemeValue As LexemeValue
 
-    Sub New(literal As Lexeme)
+    Sub New(lexemeValue As LexemeValue)
         ' TODO: Complete member initialization 
-        _literal = literal
+        _lexemeValue = lexemeValue
     End Sub
 
 End Class
