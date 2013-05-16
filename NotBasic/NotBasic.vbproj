@@ -94,6 +94,8 @@
     <Compile Include="Ast\ConcreteDefinition.vb" />
     <Compile Include="Ast\ContinueStatement.vb" />
     <Compile Include="Ast\CatchBlock.vb" />
+    <Compile Include="Ast\StringLiteral.vb" />
+    <Compile Include="Ast\CharLiteral.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitStatement.vb" />
     <Compile Include="Ast\Expression.vb" />

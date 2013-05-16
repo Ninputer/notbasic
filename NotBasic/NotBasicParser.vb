@@ -74,10 +74,7 @@ Public Class NotBasicParser
 
     Private IntegerLiteral As Token
     Private FloatLiteral As Token
-    Private RawStringLiteral As Token
-    Private EmbeddedExpStringBegin As Token
-    Private EmbeddedExpStringMiddle As Token
-    Private EmbeddedExpStringEnd As Token
+    Private RawStringLiteral As Token    
     Private CharLiteral As Token
 
     'punctuations
@@ -155,11 +152,6 @@ Public Class NotBasicParser
             ChrW(&HD), ChrW(&HA), ChrW(&H85), ChrW(&H2028), ChrW(&H2029)
         }
 
-        Dim specialStringChar As New HashSet(Of Char) From
-        {
-            """"c, "<"c, "#"c, ">"c
-        }
-
         Dim letterChar As RegularExpression
         Dim combiningChar As RegularExpression
         Dim decimalDigitChar As RegularExpression
@@ -178,7 +170,7 @@ Public Class NotBasicParser
         charSetBuilder.DefineCharSet(Function(c) Char.GetUnicodeCategory(c) = UnicodeCategory.ConnectorPunctuation, Sub(re) connectingChar = re)
         charSetBuilder.DefineCharSet(Function(c) Char.GetUnicodeCategory(c) = UnicodeCategory.Format, Sub(re) formattingChar = re)
         charSetBuilder.DefineCharSet(Function(c) Not lineTerminators.Contains(c), Sub(re) inputChar = re)
-        charSetBuilder.DefineCharSet(Function(c) (Not specialStringChar.Contains(c)) AndAlso (Not lineTerminators.Contains(c)), Sub(re) strictStringChar = re Or Literal(""""""))
+        charSetBuilder.DefineCharSet(Function(c) (c <> """"c) AndAlso (Not lineTerminators.Contains(c)), Sub(re) strictStringChar = re Or Literal(""""""))
 
         charSetBuilder.Build()
 
@@ -228,23 +220,12 @@ Public Class NotBasicParser
             Dim embeddedExpEndSymbol = Literal("#>")
             Dim doubleQuote = Symbol(""""c)
 
-            Dim delimitedStringSection = Symbol("#"c) Or (Symbol("<"c).Many() >> (strictStringChar Or lineTerminatorChar))
+            Dim stringChar = strictStringChar Or lineTerminatorChar
 
             RawStringLiteral = .DefineToken(
-                doubleQuote >> delimitedStringSection.Many() >> doubleQuote,
+                doubleQuote >> stringChar.Many() >> doubleQuote,
                 "string literal")
 
-            EmbeddedExpStringBegin = .DefineToken(
-                doubleQuote >> delimitedStringSection.Many() >> Symbol("<"c).Many1() >> Symbol("#"c),
-                "string literal ends with '<#'")
-
-            EmbeddedExpStringMiddle = .DefineToken(
-                embeddedExpEndSymbol >> delimitedStringSection.Many() >> Symbol("<"c).Many1() >> Symbol("#"c),
-                "string literal starts with '#>' and ends with '<#'")
-
-            EmbeddedExpStringEnd = .DefineToken(
-                embeddedExpEndSymbol >> delimitedStringSection.Many() >> doubleQuote,
-                "string literal starts with '#>'")
 
             Dim charChar = CharSet("cC")
             Dim textCharLiteral = doubleQuote >> strictStringChar >> doubleQuote >> charChar
@@ -434,6 +415,8 @@ Public Class NotBasicParser
     Private FloatLiteralExpression As New Production(Of Expression)
     Private NumericLiteralExpression As New Production(Of Expression)
     Private BooleanLiteralExpression As New Production(Of Expression)
+    Private StringLiteralExpression As New Production(Of Expression)   
+    Private CharLiteralExpression As New Production(Of Expression)
     Private NewArrayExpression As New Production(Of Expression)
     Private ReferenceExpression As New Production(Of Expression)
     Private MemberAccessExpression As New Production(Of Expression)
@@ -467,9 +450,8 @@ Public Class NotBasicParser
         'DONE: lambda expression/function type
         'TODO: select case statement
         'TODO: if then else statement ambiguity gramma
-        'TODO: String literals
+        'DONE: String literals
         'TODO: array access ambiguity gramma
-        'TODO: infix call expression
         'TODO: enum
         'TODO: concept default implementation
 
@@ -953,7 +935,15 @@ Public Class NotBasicParser
 
         BooleanLiteralExpression.Rule =
             From literal In (TrueKeyword.AsTerminal() Or FalseKeyword.AsTerminal())
-            Select New BooleanLiteralExpression(literal).ToExpression
+            Select New BooleanLiteralExpression(literal.Value).ToExpression
+
+        StringLiteralExpression.Rule =
+            From str In RawStringLiteral
+            Select New StringLiteral(str).ToExpression       
+
+        CharLiteralExpression.Rule =
+            From cl In CharLiteral
+            Select New CharLiteral(cl).ToExpression
 
         ReferenceExpression.Rule =
             From id In ReferenceIdentifier
@@ -980,6 +970,8 @@ Public Class NotBasicParser
         PrimaryExpression.Rule =
             NumericLiteralExpression Or
             BooleanLiteralExpression Or
+            StringLiteralExpression Or
+            CharLiteralExpression Or
             ReferenceExpression Or
             NewArrayExpression Or
             MemberAccessExpression Or

@@ -87,6 +87,22 @@ fun Lambdas()
     }
 end
 
+fun Strings()
+    s1 = "hello world"
+    s2 = "hello""world"""
+    s3 = "hello
+world
+hahaha"
+
+    s4 = "hello,
+your name is" + name + ",
+world!"
+
+    c1 = "a"c
+    c2 = "啊"c
+    c3 = &U+03AF
+end
+
 concept Functor<F<>>
     fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
