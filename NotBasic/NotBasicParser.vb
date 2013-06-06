@@ -362,6 +362,8 @@ Public Class NotBasicParser
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionDeclaration As New Production(Of FunctionDeclaration)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
+    Private LambdaParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
+    Private LambdaParameterDeclaration As New Production(Of ParameterDeclaration)
 
     Private OperatorDeclaration As New Production(Of OperatorDeclaration)
     Private OperatorDefinition As New Production(Of OperatorDefinition)
@@ -453,7 +455,10 @@ Public Class NotBasicParser
         'DONE: String literals
         'TODO: array access ambiguity gramma
         'TODO: enum
+        'DONE: type inheritence
+        'DONE: dispatch method
         'TODO: concept default implementation
+        'TODO: array literal
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -577,12 +582,13 @@ Public Class NotBasicParser
             From _type In TypeKeyword
             From typeName In DeclaringIdentifier
             From typeParams In TypeParameters.Optional
+            From baseType In TypeSpecifier.Optional
             From whereClauses In ConstraintClauses.Optional
             From _st1 In ST
             From fields In FieldDefinition.Many
             From _end In EndKeyword
             From _st2 In ST
-            Select New TypeDefinition(_type.Value.Span, _end.Value.Span, typeName, typeParams, whereClauses, fields)
+            Select New TypeDefinition(_type.Value.Span, _end.Value.Span, typeName, typeParams, baseType, whereClauses, fields)
 
         '=======================================================================
         ' Functions
@@ -592,6 +598,15 @@ Public Class NotBasicParser
            ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
 
         ParameterDeclaration.Rule =
+            From prefix In Grammar.Union(SelectKeyword, CaseKeyword).Optional
+            From did In DeclaringIdentifier
+            From typesp In TypeSpecifier.Optional()
+            Select New ParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix.Value), Nothing))
+
+        LambdaParameterList.Rule =
+           ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
+
+        LambdaParameterDeclaration.Rule =
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
             Select New ParameterDeclaration(did, typesp)
@@ -1139,16 +1154,16 @@ Public Class NotBasicParser
             Select New BinaryExpression(ExpressionOp.Or, left, right).ToExpression()
 
         Dim FreeLambdaParameter = ParameterDeclaration
-        Dim LambdaParameterList =
+        Dim LambdaParameterListDecl =
             From _lph In LeftPth
             From _lc1 In LineContinuation
-            From params In ParameterList
+            From params In LambdaParameterList
             From _lc2 In LineContinuation
             From _rph In RightPth
             Select params
 
         Dim LambdaSignatureParams =
-            LambdaParameterList Or
+            LambdaParameterListDecl Or
             From p In FreeLambdaParameter
             Select DirectCast({p}, IEnumerable(Of ParameterDeclaration))
 

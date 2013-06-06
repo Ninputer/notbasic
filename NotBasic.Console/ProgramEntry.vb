@@ -103,6 +103,14 @@ world!"
     c3 = &U+03AF
 end
 
+fun Dispatch(select a:object)
+    'dispatch method
+end
+
+fun Dispatch(case a:Point)
+    'dispatch method branch
+end
+
 concept Functor<F<>>
     fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
@@ -136,6 +144,10 @@ end
 type Point<T>
     X:T
     Y:T
+end
+
+type NewPoint<T> : Point<T>
+    Z:T
 end
 ]]>
         Dim s = parser.Parse(code.Value)

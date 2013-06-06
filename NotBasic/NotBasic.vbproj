@@ -143,6 +143,7 @@
     <Compile Include="Ast\OperatorDefinition.vb" />
     <Compile Include="Ast\TypeDefinition.vb" />
     <Compile Include="Ast\TryStatement.vb" />
+    <Compile Include="Ast\ParameterPrefix.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
