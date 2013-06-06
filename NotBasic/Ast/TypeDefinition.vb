@@ -8,6 +8,7 @@ Public Class TypeDefinition
     Private _whereClauses As IEnumerable(Of ConceptConstraintClause)
     Private _fields As IEnumerable(Of FieldDefinition)
     Private _sourceSpan1 As Compilers.SourceSpan
+    Private _baseType As TypeSpecifier
 
     Sub New(sourceSpan As Compilers.SourceSpan, sourceSpan1 As Compilers.SourceSpan, typeName As UnifiedIdentifer, typeParams As IEnumerable(Of TypeParameter), whereClauses As IEnumerable(Of ConceptConstraintClause), fields As IEnumerable(Of FieldDefinition))
         ' TODO: Complete member initialization 
@@ -15,6 +16,17 @@ Public Class TypeDefinition
         _sourceSpan1 = sourceSpan1
         _typeName = typeName
         _typeParams = typeParams
+        _whereClauses = whereClauses
+        _fields = fields
+    End Sub
+
+    Sub New(sourceSpan As Compilers.SourceSpan, sourceSpan1 As Compilers.SourceSpan, typeName As UnifiedIdentifer, typeParams As IEnumerable(Of TypeParameter), baseType As TypeSpecifier, whereClauses As IEnumerable(Of ConceptConstraintClause), fields As IEnumerable(Of FieldDefinition))
+        ' TODO: Complete member initialization 
+        _sourceSpan = sourceSpan
+        _sourceSpan1 = sourceSpan1
+        _typeName = typeName
+        _typeParams = typeParams
+        _baseType = baseType
         _whereClauses = whereClauses
         _fields = fields
     End Sub
