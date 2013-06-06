@@ -112,6 +112,9 @@ fun Dispatch(case a:Point)
     'dispatch method branch
 end
 
+fun Empty()
+end
+
 concept Functor<F<>>
     fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
