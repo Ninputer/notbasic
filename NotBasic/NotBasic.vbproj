@@ -96,8 +96,8 @@
     <Compile Include="Ast\CatchBlock.vb" />
     <Compile Include="Ast\StringLiteral.vb" />
     <Compile Include="Ast\CharLiteral.vb" />
-    <Compile Include="EnumDefinition.vb" />
-    <Compile Include="EnumElement.vb" />
+    <Compile Include="Ast\EnumDefinition.vb" />
+    <Compile Include="Ast\EnumElement.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitStatement.vb" />
     <Compile Include="Ast\Expression.vb" />

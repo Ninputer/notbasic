@@ -622,11 +622,15 @@ Public Class NotBasicParser
         ParameterList.Rule =
            ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
 
+        Dim ParamPrefix =
+            From prefix In Grammar.Union(SelectKeyword, CaseKeyword)
+            Select prefix.Value
+
         ParameterDeclaration.Rule =
-            From prefix In Grammar.Union(SelectKeyword, CaseKeyword).Optional
+            From prefix In ParamPrefix.Optional
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
-            Select New ParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix.Value), Nothing))
+            Select New ParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix), Nothing))
 
         LambdaParameterList.Rule =
            ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
