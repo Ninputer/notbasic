@@ -633,7 +633,7 @@ Public Class NotBasicParser
             Select New ParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix), Nothing))
 
         LambdaParameterList.Rule =
-           ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
+           LambdaParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
 
         LambdaParameterDeclaration.Rule =
             From did In DeclaringIdentifier
@@ -663,10 +663,10 @@ Public Class NotBasicParser
 
         FunctionDefinition.Rule =
             From decl In FunctionDeclaration
-            From statements In statements
+            From ss In Statements
             From endfun In EndKeyword
-            From _st In ST
-            Select New FunctionDefinition(decl, statements, endfun.Value.Span)
+            From _st2 In ST
+            Select New FunctionDefinition(decl, ss, endfun.Value.Span)
 
         '=======================================================================
         ' Operators
@@ -763,12 +763,13 @@ Public Class NotBasicParser
         '=======================================================================
 
         Statements.Rule =
-            Statement.Many(ST).SuffixedBy(ST.Optional)
+            Statement.Many1(ST).SuffixedBy(ST) Or
+            Grammar.Empty(Of IEnumerable(Of Statement))(Nothing)
 
         StatementsBlock.Rule =
             From _lbr In LeftBrce
             From _st1 In ST.Optional()
-            From s In Statements
+            From s In Statement.Many(ST)
             From _st2 In ST.Optional()
             From _rbr In RightBrce
             Select s
@@ -1223,6 +1224,8 @@ Public Class NotBasicParser
 
         'Return From c In Parsers.Any.Many() Select New SyntaxTreeNode(c)
         Return Program
+
+        'Return ST.SuffixedBy(EndKeyword.AsTerminal).SuffixedBy(ST).Select(Function(s) CType(Nothing, CompilationUnit))
     End Function
 
     Private m_scannerCreationTime As Long
@@ -1252,13 +1255,14 @@ Public Class NotBasicParser
         End Get
     End Property
 
-    Protected Overrides Function OnCreateTransitionTable() As Parsers.Generator.TransitionTable
+    Protected Overrides Function OnCreateTransitionTable(automaton As Parsers.Generator.LR0Model, scannerInfo As ScannerInfo) As Parsers.Generator.TransitionTable
         Dim sw As New Stopwatch()
 
         sw.Start()
-        Dim transitionTable = MyBase.OnCreateTransitionTable()
-        sw.Stop()
 
+        Dim lr0 = automaton.ToString()
+
+        Dim transitionTable = MyBase.OnCreateTransitionTable(automaton, scannerInfo)
         m_parserCreationTime = sw.ElapsedMilliseconds
 
         Return transitionTable
