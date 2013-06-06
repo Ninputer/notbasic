@@ -1255,16 +1255,21 @@ Public Class NotBasicParser
         End Get
     End Property
 
+    Private m_sw As New Stopwatch()
+
     Protected Overrides Function OnCreateTransitionTable(automaton As Parsers.Generator.LR0Model, scannerInfo As ScannerInfo) As Parsers.Generator.TransitionTable
-        Dim sw As New Stopwatch()
-
-        sw.Start()
-
-        Dim lr0 = automaton.ToString()
+        'Dim lr0 = automaton.ToString()
 
         Dim transitionTable = MyBase.OnCreateTransitionTable(automaton, scannerInfo)
-        m_parserCreationTime = sw.ElapsedMilliseconds
+        m_sw.Stop()
+
+        m_parserCreationTime = m_sw.ElapsedMilliseconds
 
         Return transitionTable
+    End Function
+
+    Protected Overrides Function OnCreateAutomaton(productionInfoManager As Parsers.Generator.ProductionInfoManager) As Parsers.Generator.LR0Model
+        m_sw.Restart()
+        Return MyBase.OnCreateAutomaton(productionInfoManager)
     End Function
 End Class
