@@ -149,6 +149,16 @@ end
 type NewPoint<T> : Point<T>
     Z:T
 end
+
+enum Weekday
+    Monday = 1
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+    Sunday = 0
+end
 ]]>
         Dim s = parser.Parse(code.Value)
 

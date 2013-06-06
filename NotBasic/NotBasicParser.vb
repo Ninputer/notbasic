@@ -63,6 +63,7 @@ Public Class NotBasicParser
     Private ToKeyword As Token
     Private StepKeyword As Token
     Private InKeyword As Token
+    Private EnumKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -320,6 +321,7 @@ Public Class NotBasicParser
             ToKeyword = .DefineToken(Literal("to"))
             StepKeyword = .DefineToken(Literal("step"))
             InKeyword = .DefineToken(Literal("in"))
+            EnumKeyword = .DefineToken(Literal("enum"))
         End With
 
         'define contextual keywords for procedure declaration
@@ -357,6 +359,7 @@ Public Class NotBasicParser
     Private TypeDefinition As New Production(Of TypeDefinition)
     Private FieldDefinition As New Production(Of FieldDefinition)
 
+    Private EnumDefinition As New Production(Of EnumDefinition)
 
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
@@ -454,11 +457,13 @@ Public Class NotBasicParser
         'TODO: if then else statement ambiguity gramma
         'DONE: String literals
         'TODO: array access ambiguity gramma
-        'TODO: enum
+        'DONE: enum
         'DONE: type inheritence
         'DONE: dispatch method
         'TODO: concept default implementation
         'TODO: array literal
+        'TODO: array type specifier
+        'TODO: runtime concept choose
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -561,7 +566,8 @@ Public Class NotBasicParser
             OperatorDefinition.Select(Function(d) d.ToDefinition()) Or
             ConceptDefinition.Select(Function(d) d.ToDefinition()) Or
             ConcreteDefinition.Select(Function(d) d.ToDefinition()) Or
-            TypeDefinition.Select(Function(d) d.ToDefinition())
+            TypeDefinition.Select(Function(d) d.ToDefinition()) Or
+            EnumDefinition.Select(Function(d) d.ToDefinition())
 
         Program.Rule =
             From _emptylines In StatementTerminator.Many
@@ -589,6 +595,25 @@ Public Class NotBasicParser
             From _end In EndKeyword
             From _st2 In ST
             Select New TypeDefinition(_type.Value.Span, _end.Value.Span, typeName, typeParams, baseType, whereClauses, fields)
+
+        Dim EnumElementValue =
+            From _eq In EqualSymbol
+            From num In IntegerLiteral
+            Select num.Value
+
+        Dim EnumElement =
+            From elementName In DeclaringIdentifier
+            From elementValue In EnumElementValue.Optional
+            Select New EnumElement(elementName, elementValue)
+
+        EnumDefinition.Rule =
+            From _enum In EnumKeyword
+            From enumName In DeclaringIdentifier
+            From _st1 In ST
+            From elements In EnumElement.SuffixedBy(ST).Many1
+            From _end In EndKeyword
+            From _st2 In ST
+            Select New EnumDefinition(_enum.Value.Span, _end.Value.Span, enumName, elements)
 
         '=======================================================================
         ' Functions
