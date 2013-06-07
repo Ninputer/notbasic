@@ -7,9 +7,10 @@ Module ProgramEntry
         Dim em As New CompilationErrorManager
         Dim parser As New NotBasicParser(em)
 
+
         Dim code = <![CDATA[
 fun Foo(a, b)
-    return Test()
+    return Test() 
 end
 
 fun Bar(f:fun(int)int, g:fun())
@@ -113,6 +114,47 @@ fun Dispatch(case a:Point)
 end
 
 fun Empty()
+end
+
+fun IfAmbiguity():int
+    if a then if b then return 0 else return 1
+end
+
+fun NewArrayAmbiguity()
+    a = new int[5]
+    b = new int[][5]
+
+end
+
+fun SelectCaseStatement()
+    select a
+    end
+
+    select b
+        case 1
+            print(a)
+        case 2,3,4
+            print(b)
+        case 3, it > 0 and it < 9
+            print(c)
+        case else
+            print(d)
+    end
+
+    select c
+        case 1
+        case 2
+    end
+
+    select d
+        case else
+    end
+
+    select e
+        case else
+        case 
+        case else
+    end
 end
 
 concept Functor<F<>>

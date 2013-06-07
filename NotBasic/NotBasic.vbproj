@@ -98,6 +98,8 @@
     <Compile Include="Ast\CharLiteral.vb" />
     <Compile Include="Ast\EnumDefinition.vb" />
     <Compile Include="Ast\EnumElement.vb" />
+    <Compile Include="Ast\CaseBlock.vb" />
+    <Compile Include="Ast\CaseElseBlock.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
@@ -146,6 +148,7 @@
     <Compile Include="Ast\TypeDefinition.vb" />
     <Compile Include="Ast\TryStatement.vb" />
     <Compile Include="Ast\ParameterPrefix.vb" />
+    <Compile Include="Ast\SelectCaseStatement.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

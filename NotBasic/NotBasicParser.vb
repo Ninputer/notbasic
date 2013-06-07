@@ -75,7 +75,7 @@ Public Class NotBasicParser
 
     Private IntegerLiteral As Token
     Private FloatLiteral As Token
-    Private RawStringLiteral As Token    
+    Private RawStringLiteral As Token
     Private CharLiteral As Token
 
     'punctuations
@@ -387,6 +387,8 @@ Public Class NotBasicParser
     Private Statements As New Production(Of IEnumerable(Of Statement))
     Private Statement As New Production(Of Statement)
     Private SingleLineStatement As New Production(Of Statement)
+    Private SingleLineOpenStatement As New Production(Of Statement)
+    Private SingleLineClosedStatement As New Production(Of Statement)
     Private BlockStatement As New Production(Of Statement)
     Private StatementsBlock As New Production(Of IEnumerable(Of Statement))
 
@@ -395,6 +397,8 @@ Public Class NotBasicParser
     Private ExpressionStatement As New Production(Of Statement)
     Private CallStatement As New Production(Of Statement)
     Private IfThenStatement As New Production(Of Statement)
+    Private IfThenElseOpenStatement As New Production(Of Statement)
+    Private IfThenElseClosedStatement As New Production(Of Statement)
     Private IfBlockStatement As New Production(Of Statement)
     Private DoStatement As New Production(Of Statement)
     Private TryStatement As New Production(Of Statement)
@@ -402,9 +406,11 @@ Public Class NotBasicParser
     Private ForEachStatement As New Production(Of Statement)
     Private ExitStatement As New Production(Of Statement)
     Private ContinueStatement As New Production(Of Statement)
+    Private SelectCaseStatement As New Production(Of Statement)
 
     Private Expression As New Production(Of Expression)
     Private PrimaryExpression As New Production(Of Expression)
+    Private PrimaryExpressionNonNewArray As New Production(Of Expression)
     Private FactorExpression As New Production(Of Expression)
     Private TermExpression As New Production(Of Expression)
     Private ComparandExpression As New Production(Of Expression)
@@ -420,7 +426,7 @@ Public Class NotBasicParser
     Private FloatLiteralExpression As New Production(Of Expression)
     Private NumericLiteralExpression As New Production(Of Expression)
     Private BooleanLiteralExpression As New Production(Of Expression)
-    Private StringLiteralExpression As New Production(Of Expression)   
+    Private StringLiteralExpression As New Production(Of Expression)
     Private CharLiteralExpression As New Production(Of Expression)
     Private NewArrayExpression As New Production(Of Expression)
     Private ReferenceExpression As New Production(Of Expression)
@@ -445,6 +451,9 @@ Public Class NotBasicParser
 
         errorManager.DefineError(ErrorCode.RightShiftSymbolError, 0, CompilationStage.Parsing, "Spaces between >> operator are not allowed")
         errorManager.DefineError(ErrorCode.NotEqualSymbolError, 0, CompilationStage.Parsing, "Spaces between <> operator are not allowed")
+        errorManager.DefineError(ErrorCode.CaseIsNotAllowedAfterCaseElse, 0, CompilationStage.Parsing, "'Case' clause is not allowed after 'Case Else'")
+        errorManager.DefineError(ErrorCode.CaseElseCanHaveOnlyOne, 0, CompilationStage.Parsing, "Only one 'Case Else' clause is allowed")
+        errorManager.DefineError(ErrorCode.ExpressionExpected, 0, CompilationStage.Parsing, "Expression expected")
     End Sub
 
     Protected Overrides Function OnDefineGrammar() As ProductionBase(Of CompilationUnit)
@@ -453,16 +462,16 @@ Public Class NotBasicParser
         'DONE: for/foreach statement
         'DONE: try/catch statement
         'DONE: lambda expression/function type
-        'TODO: select case statement
-        'TODO: if then else statement ambiguity gramma
+        'DONE: select case statement
+        'DONE: if then else statement ambiguity gramma
         'DONE: String literals
-        'TODO: array access ambiguity gramma
+        'DONE: array access ambiguity gramma
         'DONE: enum
         'DONE: type inheritence
         'DONE: dispatch method
         'TODO: concept default implementation
         'TODO: array literal
-        'TODO: array type specifier
+        'DONE: array type specifier
         'TODO: runtime concept choose
 
         StatementTerminator.Rule =
@@ -493,11 +502,17 @@ Public Class NotBasicParser
             (From eid In EscapedIdentifier
              Select New UnifiedIdentifer(eid.Value, True))
 
+        ArrayTypeName.Rule =
+            From baseType In TypeName
+            From _lbk In LeftBrck
+            From _rbk In RightBrck
+            Select DirectCast(New ArrayTypeName(baseType), TypeName)
+
         TypeName.Rule =
             QualifiedTypeName Or
             PrimitiveTypeName Or
-            FunctionTypeName
-        'ArrayTypeName Or
+            FunctionTypeName Or
+            ArrayTypeName
 
         QualifiedTypeName.Rule =
             From id In ReferenceIdentifier
@@ -779,19 +794,28 @@ Public Class NotBasicParser
             BlockStatement
 
         SingleLineStatement.Rule =
+            SingleLineOpenStatement Or
+            SingleLineClosedStatement
+
+        SingleLineClosedStatement.Rule =
             ReturnStatement Or
             AssignmentStatement Or
-            IfThenStatement Or
+            IfThenElseClosedStatement Or
             ExpressionStatement Or
             ContinueStatement Or
             ExitStatement
+
+        SingleLineOpenStatement.Rule =
+            IfThenStatement Or
+            IfThenElseOpenStatement
 
         BlockStatement.Rule =
             IfBlockStatement Or
             DoStatement Or
             ForStatement Or
             ForEachStatement Or
-            TryStatement
+            TryStatement Or
+            SelectCaseStatement
 
         ReturnStatement.Rule =
             From keyword In ReturnKeyword
@@ -815,10 +839,28 @@ Public Class NotBasicParser
             From condition In Expression
             From _then In ThenKeyword
             From trueStatement In SingleLineStatement
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, Nothing).ToStatement
+
+        IfThenElseOpenStatement.Rule =
+            From _if In IfKeyword
+            From condition In Expression
+            From _then In ThenKeyword
+            From trueStatement In SingleLineClosedStatement
             From elsePart In (
                 From _else In ElseKeyword
-                From elseStatement In SingleLineStatement
-                Select elseStatement).Optional
+                From elseStatement In SingleLineOpenStatement
+                Select elseStatement)
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToStatement
+
+        IfThenElseClosedStatement.Rule =
+            From _if In IfKeyword
+            From condition In Expression
+            From _then In ThenKeyword
+            From trueStatement In SingleLineClosedStatement
+            From elsePart In (
+                From _else In ElseKeyword
+                From elseStatement In SingleLineClosedStatement
+                Select elseStatement)
             Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToStatement
 
         Dim ElseIfBlock =
@@ -963,6 +1005,37 @@ Public Class NotBasicParser
             From _next In NextKeyword
             Select New ForEachStatement(_for.Value.Span, _each.Value.Span, loopVar, typeSp, enumExp, forBody).ToStatement
 
+        Dim CaseExpressionList =
+            Expression.Many(Comma.Concat(LineContinuation))
+
+        Dim CaseBlock =
+            From _case In CaseKeyword
+            From expList In CaseExpressionList Where Grammar.Check(expList.Count() > 0, ErrorCode.ExpressionExpected, _case.Value.Span)
+            From _st In ST
+            From caseBody In Statements
+            Select New CaseBlock(_case.Value.Span, expList, caseBody)
+
+        Dim CaseElseBlock =
+            From _case In CaseKeyword
+            From _else In ElseKeyword
+            From _st In ST
+            From caseBody In Statements
+            Select New CaseElseBlock(_case.Value.Span, _else.Value.Span, caseBody)
+
+        Dim ErrorCase =
+            (From errCaseBlock In CaseBlock Where Grammar.Check(False, ErrorCode.CaseIsNotAllowedAfterCaseElse, errCaseBlock.CaseSpan) Select Nothing) Or
+            From errCaseElseBlock In CaseElseBlock Where Grammar.Check(False, ErrorCode.CaseElseCanHaveOnlyOne, errCaseElseBlock.CaseSpan) Select Nothing
+
+
+        SelectCaseStatement.Rule =
+            From _select In SelectKeyword
+            From selectExp In Expression.Optional
+            From _st In ST
+            From caseBlocks In CaseBlock.Many()
+            From caseElse In CaseElseBlock.Optional()
+            From errors In ErrorCase.Many()
+            From _end In EndKeyword
+            Select New SelectCaseStatement(_select.Value.Span, _end.Value.Span, selectExp, caseBlocks, caseElse).ToStatement()
 
         '=======================================================================
         ' Expressions
@@ -984,7 +1057,7 @@ Public Class NotBasicParser
 
         StringLiteralExpression.Rule =
             From str In RawStringLiteral
-            Select New StringLiteral(str).ToExpression       
+            Select New StringLiteral(str).ToExpression
 
         CharLiteralExpression.Rule =
             From cl In CharLiteral
@@ -1013,12 +1086,15 @@ Public Class NotBasicParser
             Select New NewArrayExpression(_new.Value.Span, _lbk.Value.Span, _rbk.Value.Span, type, length).ToExpression
 
         PrimaryExpression.Rule =
+            NewArrayExpression Or
+            PrimaryExpressionNonNewArray
+
+        PrimaryExpressionNonNewArray.Rule =
             NumericLiteralExpression Or
             BooleanLiteralExpression Or
             StringLiteralExpression Or
             CharLiteralExpression Or
             ReferenceExpression Or
-            NewArrayExpression Or
             MemberAccessExpression Or
             Expression.PackedBy(LeftPth, RightPth)
 
@@ -1032,7 +1108,7 @@ Public Class NotBasicParser
             Select New CallExpression(callable, arguments).ToExpression()
 
         BracketExpression.Rule =
-            From indexable In PrimaryExpression
+            From indexable In PrimaryExpressionNonNewArray
             From _lbk In LeftBrck
             From _lc In LineContinuation
             From arguments In ArgumentList
