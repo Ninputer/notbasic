@@ -2,11 +2,11 @@
 Public Class FunctionDefinition
     Inherits Definition
 
-    Private m_decl As FunctionDeclaration
+    Private m_decl As FunctionSignature
     Private m_sourceSpan As Compilers.SourceSpan
     Private m_statements As IList(Of Statement)
 
-    Sub New(decl As FunctionDeclaration, statements As IEnumerable(Of Statement), sourceSpan As Compilers.SourceSpan)
+    Sub New(decl As FunctionSignature, statements As IEnumerable(Of Statement), sourceSpan As Compilers.SourceSpan)
         If statements Is Nothing Then Exit Sub
 
         m_decl = decl

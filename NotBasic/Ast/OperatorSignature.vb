@@ -1,6 +1,6 @@
 ﻿
-Public Class OperatorDeclaration
-    Inherits Declaration
+Public Class OperatorSignature
+    Inherits ProcedureSignature
 
     Private _sourceSpan As Compilers.SourceSpan
     Private _op As Compilers.Scanners.LexemeValue

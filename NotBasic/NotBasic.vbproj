@@ -89,11 +89,12 @@
     <Compile Include="Ast\ConceptConstraintClause.vb" />
     <Compile Include="Ast\ConcreteDeclaration.vb" />
     <Compile Include="Ast\Definition.vb" />
-    <Compile Include="Ast\Declaration.vb" />
+    <Compile Include="Ast\ProcedureDeclaration.vb" />
     <Compile Include="Ast\ConceptDefinition.vb" />
     <Compile Include="Ast\ConcreteDefinition.vb" />
     <Compile Include="Ast\ContinueStatement.vb" />
     <Compile Include="Ast\CatchBlock.vb" />
+    <Compile Include="Ast\ProcedureSignature.vb" />
     <Compile Include="Ast\StringLiteral.vb" />
     <Compile Include="Ast\CharLiteral.vb" />
     <Compile Include="Ast\EnumDefinition.vb" />
@@ -104,7 +105,7 @@
     <Compile Include="Ast\ExitStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
     <Compile Include="Ast\ExpressionOp.vb" />
-    <Compile Include="Ast\FunctionDeclaration.vb" />
+    <Compile Include="Ast\FunctionSignature.vb" />
     <Compile Include="Ast\FunctionDefinition.vb" />
     <Compile Include="Ast\IfBlockStatement.vb" />
     <Compile Include="Ast\IfThenStatement.vb" />
@@ -143,7 +144,7 @@
     <Compile Include="Ast\TypeSpecifier.vb" />
     <Compile Include="Ast\TypeParameter.vb" />
     <Compile Include="Ast\TypeConstraintClause.vb" />
-    <Compile Include="Ast\OperatorDeclaration.vb" />
+    <Compile Include="Ast\OperatorSignature.vb" />
     <Compile Include="Ast\OperatorDefinition.vb" />
     <Compile Include="Ast\TypeDefinition.vb" />
     <Compile Include="Ast\TryStatement.vb" />

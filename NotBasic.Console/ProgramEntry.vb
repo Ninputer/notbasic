@@ -150,25 +150,35 @@ fun SelectCaseStatement()
         case else
     end
 
-    select e
-        case else
-        case 
+    select
+        case a > 0
         case else
     end
 end
 
 concept Functor<F<>>
-    fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
+    declare fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
 
 concept Monad<M<>> where Functor<M>
-    fun unit<U>(a:U):M<U>
-    fun bind<T, U>(m:M<T>, f:fun(T)M<U>):M<U>
+    declare fun unit<U>(a:U):M<U>
+    declare fun bind<T, U>(m:M<T>, f:fun(T)M<U>):M<U>
 end
 
 concept Comparable<T>
-    fun Compare(a:T, b:T):int
-    operator<(a:T, b:T):boolean
+    declare fun Compare(a:T, b:T):int
+    declare operator<(a:T, b:T):boolean
+end
+
+concept EqualityComparable<T>
+    declare fun Equals(a:T, b:T):bool
+    operator=(a:T, b:T):bool
+        return Equals(a,b)
+    end
+
+    operator<>(a:T, b:T):bool
+        return not Equals(a,b)
+    end    
 end
 
 concrete Comparable<int>

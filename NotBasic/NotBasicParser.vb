@@ -363,12 +363,12 @@ Public Class NotBasicParser
 
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
-    Private FunctionDeclaration As New Production(Of FunctionDeclaration)
+    Private FunctionSignature As New Production(Of FunctionSignature)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
     Private LambdaParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private LambdaParameterDeclaration As New Production(Of ParameterDeclaration)
 
-    Private OperatorDeclaration As New Production(Of OperatorDeclaration)
+    Private OperatorSignature As New Production(Of OperatorSignature)
     Private OperatorDefinition As New Production(Of OperatorDefinition)
     Private ShiftRightOperator As New Production(Of LexemeValue)
     Private NotEqualOperator As New Production(Of LexemeValue)
@@ -381,7 +381,7 @@ Public Class NotBasicParser
     Private TypeConstraintClause As New Production(Of TypeConstraintClause)
     Private ConcreteDeclaration As New Production(Of ConcreteDeclaration)
     Private ConcreteDefinition As New Production(Of ConcreteDefinition)
-    Private ProcedureDeclaration As New Production(Of Declaration)
+    Private ProcedureDeclaration As New Production(Of ProcedureDeclaration)
     Private ProcedureDefinition As New Production(Of Definition)
 
     Private Statements As New Production(Of IEnumerable(Of Statement))
@@ -451,8 +451,8 @@ Public Class NotBasicParser
 
         errorManager.DefineError(ErrorCode.RightShiftSymbolError, 0, CompilationStage.Parsing, "Spaces between >> operator are not allowed")
         errorManager.DefineError(ErrorCode.NotEqualSymbolError, 0, CompilationStage.Parsing, "Spaces between <> operator are not allowed")
-        errorManager.DefineError(ErrorCode.CaseIsNotAllowedAfterCaseElse, 0, CompilationStage.Parsing, "'Case' clause is not allowed after 'Case Else'")
-        errorManager.DefineError(ErrorCode.CaseElseCanHaveOnlyOne, 0, CompilationStage.Parsing, "Only one 'Case Else' clause is allowed")
+        errorManager.DefineError(ErrorCode.CaseIsNotAllowedAfterCaseElse, 0, CompilationStage.Parsing, "'case' clause is not allowed after 'case else'")
+        errorManager.DefineError(ErrorCode.CaseElseCanHaveOnlyOne, 0, CompilationStage.Parsing, "Only one 'case else' clause is allowed")
         errorManager.DefineError(ErrorCode.ExpressionExpected, 0, CompilationStage.Parsing, "Expression expected")
     End Sub
 
@@ -469,7 +469,7 @@ Public Class NotBasicParser
         'DONE: enum
         'DONE: type inheritence
         'DONE: dispatch method
-        'TODO: concept default implementation
+        'DONE: concept default implementation
         'TODO: array literal
         'DONE: array type specifier
         'TODO: runtime concept choose
@@ -577,12 +577,12 @@ Public Class NotBasicParser
         '=======================================================================
 
         TopLevelStructure.Rule =
-            FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
-            OperatorDefinition.Select(Function(d) d.ToDefinition()) Or
-            ConceptDefinition.Select(Function(d) d.ToDefinition()) Or
-            ConcreteDefinition.Select(Function(d) d.ToDefinition()) Or
-            TypeDefinition.Select(Function(d) d.ToDefinition()) Or
-            EnumDefinition.Select(Function(d) d.ToDefinition())
+            FunctionDefinition.Select(Function(d) d.ToBase()) Or
+            OperatorDefinition.Select(Function(d) d.ToBase()) Or
+            ConceptDefinition.Select(Function(d) d.ToBase()) Or
+            ConcreteDefinition.Select(Function(d) d.ToBase()) Or
+            TypeDefinition.Select(Function(d) d.ToBase()) Or
+            EnumDefinition.Select(Function(d) d.ToBase())
 
         Program.Rule =
             From _emptylines In StatementTerminator.Many
@@ -662,7 +662,7 @@ Public Class NotBasicParser
             Select New TypeSpecifier(spTypeName)
 
         'FunctionDeclaration := fun name ( arglist ) <st>
-        FunctionDeclaration.Rule =
+        FunctionSignature.Rule =
             From keyword In FunctionKeyword
             From name In DeclaringIdentifier
             From typeParams In TypeParameters.Optional
@@ -674,10 +674,10 @@ Public Class NotBasicParser
             From returnTypeSp In TypeSpecifier.Optional()
             From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New FunctionDeclaration(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
+            Select New FunctionSignature(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
 
         FunctionDefinition.Rule =
-            From decl In FunctionDeclaration
+            From decl In FunctionSignature
             From ss In Statements
             From endfun In EndKeyword
             From _st2 In ST
@@ -696,7 +696,7 @@ Public Class NotBasicParser
             Select op.Value
 
         'OperatorDeclaration := operator op ( arglist ) <st>
-        OperatorDeclaration.Rule =
+        OperatorSignature.Rule =
             From _operator In OperatorKeyword
             From op In OverloadableOperator
             From typeParams In TypeParameters.Optional
@@ -708,10 +708,10 @@ Public Class NotBasicParser
             From returnTypeSp In TypeSpecifier.Optional()
             From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New OperatorDeclaration(_operator.Value.Span, op, paramlist, returnTypeSp, typeParams, whereClauses)
+            Select New OperatorSignature(_operator.Value.Span, op, paramlist, returnTypeSp, typeParams, whereClauses)
 
         OperatorDefinition.Rule =
-            From decl In OperatorDeclaration
+            From decl In OperatorSignature
             From statements In statements
             From endfun In EndKeyword
             From _st In ST
@@ -751,20 +751,29 @@ Public Class NotBasicParser
             From _st In ST
             Select New ConcreteDeclaration(_concrete.Value.Span, typeParams, conceptName, typeArgs, whereClauses)
 
+        Dim ProcedureDeclarationOrDefinition =
+            ProcedureDeclaration.Select(Function(d) d.ToBase) Or
+            ProcedureDefinition
+
         ConceptDefinition.Rule =
             From decl In ConceptDeclaration
-            From procedures In ProcedureDeclaration.Many()
+            From procedures In ProcedureDeclarationOrDefinition.Many()
             From _end In EndKeyword
             From _st In ST
             Select New ConceptDefinition(decl, procedures, _end.Value.Span)
 
+        Dim ProcedureSignature =
+            FunctionSignature.Select(Function(s) s.ToBase) Or
+            OperatorSignature.Select(Function(s) s.ToBase)
+
         ProcedureDeclaration.Rule =
-            FunctionDeclaration.Select(Function(d) d.ToDeclaration()) Or
-            OperatorDeclaration.Select(Function(d) d.ToDeclaration())
+            From _declare In DeclareKeyword
+            From signature In ProcedureSignature
+            Select New ProcedureDeclaration(_declare.Value.Span, signature)
 
         ProcedureDefinition.Rule =
-            FunctionDefinition.Select(Function(d) d.ToDefinition()) Or
-            OperatorDefinition.Select(Function(d) d.ToDefinition())
+            FunctionDefinition.Select(Function(d) d.ToBase()) Or
+            OperatorDefinition.Select(Function(d) d.ToBase())
 
         ConcreteDefinition.Rule =
             From decl In ConcreteDeclaration
@@ -821,25 +830,25 @@ Public Class NotBasicParser
             From keyword In ReturnKeyword
             From _lc In LineContinuation
             From returnValue In Expression.Optional()
-            Select New ReturnStatement(keyword.Value.Span, returnValue).ToStatement
+            Select New ReturnStatement(keyword.Value.Span, returnValue).ToBase
 
         AssignmentStatement.Rule =
             From id In ReferenceIdentifier
             From _eq In EqualSymbol
             From _lc In LineContinuation
             From value In Expression
-            Select New AssignmentStatement(id, value).ToStatement
+            Select New AssignmentStatement(id, value).ToBase
 
         ExpressionStatement.Rule =
             From exp In CallExpression
-            Select New ExpressionStatement(exp).ToStatement
+            Select New ExpressionStatement(exp).ToBase
 
         IfThenStatement.Rule =
             From _if In IfKeyword
             From condition In Expression
             From _then In ThenKeyword
             From trueStatement In SingleLineStatement
-            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, Nothing).ToStatement
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, Nothing).ToBase
 
         IfThenElseOpenStatement.Rule =
             From _if In IfKeyword
@@ -850,7 +859,7 @@ Public Class NotBasicParser
                 From _else In ElseKeyword
                 From elseStatement In SingleLineOpenStatement
                 Select elseStatement)
-            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToStatement
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToBase
 
         IfThenElseClosedStatement.Rule =
             From _if In IfKeyword
@@ -861,7 +870,7 @@ Public Class NotBasicParser
                 From _else In ElseKeyword
                 From elseStatement In SingleLineClosedStatement
                 Select elseStatement)
-            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToStatement
+            Select New IfThenStatement(_if.Value.Span, condition, trueStatement, elsePart).ToBase
 
         Dim ElseIfBlock =
             From _elseif In ElseIfKeyword
@@ -884,7 +893,7 @@ Public Class NotBasicParser
             From elseIfBlocks In ElseIfBlock.Many
             From elseBlockOpt In ElseBlock.Optional
             From _end In EndKeyword
-            Select New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt).ToStatement
+            Select New IfBlockStatement(_if.Value.Span, _end.Value.Span, condition, truePart, elseIfBlocks, elseBlockOpt).ToBase
 
         Dim DoLoopForm =
             From _do In DoKeyword
@@ -939,12 +948,12 @@ Public Class NotBasicParser
         ContinueStatement.Rule =
             From _continue In ContinueKeyword
             From loopStruct In Grammar.Union(ForKeyword, DoKeyword)
-            Select New ContinueStatement(_continue.Value.Span, loopStruct.Value).ToStatement
+            Select New ContinueStatement(_continue.Value.Span, loopStruct.Value).ToBase
 
         ExitStatement.Rule =
             From _exit In ExitKeyword
             From exitStruct In Grammar.Union(ForKeyword, DoKeyword, TryKeyword, SelectKeyword, FunctionKeyword)
-            Select New ExitStatement(_exit.Value.Span, exitStruct.Value).ToStatement
+            Select New ExitStatement(_exit.Value.Span, exitStruct.Value).ToBase
 
         Dim CatchWithTypeBlock =
             From _catch In CatchKeyword
@@ -974,7 +983,7 @@ Public Class NotBasicParser
             From _catchBlock In CatchBlock.Optional
             From _finallyBlock In FinallyBlock.Optional
             From _end In EndKeyword
-            Select New TryStatement(_try.Value.Span, _end.Value.Span, tryBody, typeCatches, _catchBlock, _finallyBlock).ToStatement
+            Select New TryStatement(_try.Value.Span, _end.Value.Span, tryBody, typeCatches, _catchBlock, _finallyBlock).ToBase
 
         ForStatement.Rule =
             From _for In ForKeyword
@@ -990,7 +999,7 @@ Public Class NotBasicParser
             From _st1 In ST
             From forBody In Statements
             From _next In NextKeyword
-            Select New ForStatement(_for.Value.Span, _next.Value.Span, loopVar, typeSp, fromExp, toExp, stepExp, forBody).ToStatement
+            Select New ForStatement(_for.Value.Span, _next.Value.Span, loopVar, typeSp, fromExp, toExp, stepExp, forBody).ToBase
 
         ForEachStatement.Rule =
             From _for In ForKeyword
@@ -1003,7 +1012,7 @@ Public Class NotBasicParser
             From _st1 In ST
             From forBody In Statements
             From _next In NextKeyword
-            Select New ForEachStatement(_for.Value.Span, _each.Value.Span, loopVar, typeSp, enumExp, forBody).ToStatement
+            Select New ForEachStatement(_for.Value.Span, _each.Value.Span, loopVar, typeSp, enumExp, forBody).ToBase
 
         Dim CaseExpressionList =
             Expression.Many(Comma.Concat(LineContinuation))
@@ -1035,45 +1044,45 @@ Public Class NotBasicParser
             From caseElse In CaseElseBlock.Optional()
             From errors In ErrorCase.Many()
             From _end In EndKeyword
-            Select New SelectCaseStatement(_select.Value.Span, _end.Value.Span, selectExp, caseBlocks, caseElse).ToStatement()
+            Select New SelectCaseStatement(_select.Value.Span, _end.Value.Span, selectExp, caseBlocks, caseElse).ToBase()
 
         '=======================================================================
         ' Expressions
         '=======================================================================
         IntegerLiteralExpression.Rule =
             From literal In IntegerLiteral
-            Select New IntegerLiteralExpression(literal).ToExpression
+            Select New IntegerLiteralExpression(literal).ToBase
 
         FloatLiteralExpression.Rule =
             From literal In FloatLiteral
-            Select New FloatLiteralExpression(literal).ToExpression
+            Select New FloatLiteralExpression(literal).ToBase
 
         NumericLiteralExpression.Rule =
             IntegerLiteralExpression Or FloatLiteralExpression
 
         BooleanLiteralExpression.Rule =
             From literal In (TrueKeyword.AsTerminal() Or FalseKeyword.AsTerminal())
-            Select New BooleanLiteralExpression(literal.Value).ToExpression
+            Select New BooleanLiteralExpression(literal.Value).ToBase
 
         StringLiteralExpression.Rule =
             From str In RawStringLiteral
-            Select New StringLiteral(str).ToExpression
+            Select New StringLiteral(str).ToBase
 
         CharLiteralExpression.Rule =
             From cl In CharLiteral
-            Select New CharLiteral(cl).ToExpression
+            Select New CharLiteral(cl).ToBase
 
         ReferenceExpression.Rule =
             From id In ReferenceIdentifier
             From typeArgs In TypeArguments.Optional
-            Select New ReferenceExpression(id, typeArgs).ToExpression
+            Select New ReferenceExpression(id, typeArgs).ToBase
 
         MemberAccessExpression.Rule =
             From exp In PrimaryExpression
             From _dot In Dot
             From memberName In ReferenceIdentifier
             From typeArgs In TypeArguments.Optional
-            Select New MemberAccessExpression(exp, memberName, typeArgs).ToExpression()
+            Select New MemberAccessExpression(exp, memberName, typeArgs).ToBase()
 
         NewArrayExpression.Rule =
             From _new In NewKeyword
@@ -1083,7 +1092,7 @@ Public Class NotBasicParser
             From length In Expression
             From _lc2 In LineContinuation
             From _rbk In RightBrck
-            Select New NewArrayExpression(_new.Value.Span, _lbk.Value.Span, _rbk.Value.Span, type, length).ToExpression
+            Select New NewArrayExpression(_new.Value.Span, _lbk.Value.Span, _rbk.Value.Span, type, length).ToBase
 
         PrimaryExpression.Rule =
             NewArrayExpression Or
@@ -1105,7 +1114,7 @@ Public Class NotBasicParser
             From arguments In ArgumentList
             From _lc2 In LineContinuation
             From _rph In RightPth
-            Select New CallExpression(callable, arguments).ToExpression()
+            Select New CallExpression(callable, arguments).ToBase()
 
         BracketExpression.Rule =
             From indexable In PrimaryExpressionNonNewArray
@@ -1114,7 +1123,7 @@ Public Class NotBasicParser
             From arguments In ArgumentList
             From _lc2 In LineContinuation
             From _rbk In RightBrck
-            Select New BracketExpression(indexable, arguments).ToExpression()
+            Select New BracketExpression(indexable, arguments).ToBase()
 
         Dim basicExpression = PrimaryExpression Or CallExpression Or BracketExpression
 
@@ -1123,20 +1132,20 @@ Public Class NotBasicParser
             basicExpression Or
             (From op In MinusSymbol
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Value.Span, ExpressionOp.Minus, exp).ToExpression) Or
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Minus, exp).ToBase) Or
             (From op In PlusSymbol
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Value.Span, ExpressionOp.Plus, exp).ToExpression) Or
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Plus, exp).ToBase) Or
             (From op In NotKeyword
             From exp In UnaryExpression
-            Select New UnaryExpression(op.Value.Span, ExpressionOp.Not, exp).ToExpression) Or
+            Select New UnaryExpression(op.Value.Span, ExpressionOp.Not, exp).ToBase) Or
             CastExpression
 
         CastExpression.Rule =
             From op In CastKeyword
             From typesp In TypeSpecifier.Optional
             From exp In UnaryExpression
-            Select New CastExpression(op.Value.Span, exp, typesp).ToExpression
+            Select New CastExpression(op.Value.Span, exp, typesp).ToBase
 
         'binary expressions
         FactorExpression.Rule = UnaryExpression
@@ -1147,17 +1156,17 @@ Public Class NotBasicParser
             From op In Asterisk
             From _lc In LineContinuation
             From right In FactorExpression
-            Select New BinaryExpression(ExpressionOp.Multiplication, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Multiplication, left, right).ToBase()) Or
             (From left In TermExpression
             From op In Slash
             From _lc In LineContinuation
             From right In FactorExpression
-            Select New BinaryExpression(ExpressionOp.Divition, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Divition, left, right).ToBase()) Or
             (From left In TermExpression
             From op In ModKeyword
             From _lc In LineContinuation
             From right In FactorExpression
-            Select New BinaryExpression(ExpressionOp.Modulo, left, right).ToExpression())
+            Select New BinaryExpression(ExpressionOp.Modulo, left, right).ToBase())
 
         ShiftingExpression.Rule =
             TermExpression Or
@@ -1165,12 +1174,12 @@ Public Class NotBasicParser
             From op In PlusSymbol
             From _lc In LineContinuation
             From right In TermExpression
-            Select New BinaryExpression(ExpressionOp.Addition, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Addition, left, right).ToBase()) Or
             (From left In ShiftingExpression
             From op In MinusSymbol
             From _lc In LineContinuation
             From right In TermExpression
-            Select New BinaryExpression(ExpressionOp.Minus, left, right).ToExpression())
+            Select New BinaryExpression(ExpressionOp.Minus, left, right).ToBase())
 
         ShiftRightOperator.Rule =
             From g1 In GreaterSymbol
@@ -1185,12 +1194,12 @@ Public Class NotBasicParser
             From op In ShiftLeft
             From _lc In LineContinuation
             From right In ShiftingExpression
-            Select New BinaryExpression(ExpressionOp.ShiftLeft, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.ShiftLeft, left, right).ToBase()) Or
             (From left In ComparandExpression
             From _shr In ShiftRightOperator
             From _lc In LineContinuation
             From right In ShiftingExpression
-            Select New BinaryExpression(ExpressionOp.ShiftRight, left, right).ToExpression())
+            Select New BinaryExpression(ExpressionOp.ShiftRight, left, right).ToBase())
 
         ComparisonExpression.Rule =
             ComparandExpression Or
@@ -1198,22 +1207,22 @@ Public Class NotBasicParser
             From op In GreaterSymbol
             From _lc In LineContinuation
             From right In ComparandExpression
-            Select New BinaryExpression(ExpressionOp.Greater, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Greater, left, right).ToBase()) Or
             (From left In ComparisonExpression
             From op In GreaterEqual
             From _lc In LineContinuation
             From right In ComparandExpression
-            Select New BinaryExpression(ExpressionOp.GreaterEqual, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.GreaterEqual, left, right).ToBase()) Or
             (From left In ComparisonExpression
             From op In LessSymbol
             From _lc In LineContinuation
             From right In ComparandExpression
-            Select New BinaryExpression(ExpressionOp.Less, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Less, left, right).ToBase()) Or
             (From left In ComparisonExpression
             From op In LessEqual
             From _lc In LineContinuation
             From right In ComparandExpression
-            Select New BinaryExpression(ExpressionOp.LessEqual, left, right).ToExpression())
+            Select New BinaryExpression(ExpressionOp.LessEqual, left, right).ToBase())
 
         NotEqualOperator.Rule =
             From lt In LessSymbol
@@ -1228,12 +1237,12 @@ Public Class NotBasicParser
             From op In EqualSymbol
             From _lc In LineContinuation
             From right In ComparisonExpression
-            Select New BinaryExpression(ExpressionOp.Equal, left, right).ToExpression()) Or
+            Select New BinaryExpression(ExpressionOp.Equal, left, right).ToBase()) Or
             (From left In EqualityExpression
             From _neq In NotEqualOperator
             From _lc In LineContinuation
             From right In ComparisonExpression
-            Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToExpression())
+            Select New BinaryExpression(ExpressionOp.NotEqual, left, right).ToBase())
 
         AndExpression.Rule =
             EqualityExpression Or
@@ -1241,7 +1250,7 @@ Public Class NotBasicParser
             From op In AndKeyword
             From _lc In LineContinuation
             From right In EqualityExpression
-            Select New BinaryExpression(ExpressionOp.And, left, right).ToExpression()
+            Select New BinaryExpression(ExpressionOp.And, left, right).ToBase()
 
         XorExpression.Rule =
             AndExpression Or
@@ -1249,7 +1258,7 @@ Public Class NotBasicParser
             From op In XorKeyword
             From _lc In LineContinuation
             From right In AndExpression
-            Select New BinaryExpression(ExpressionOp.Xor, left, right).ToExpression()
+            Select New BinaryExpression(ExpressionOp.Xor, left, right).ToBase()
 
         OrExpression.Rule =
             XorExpression Or
@@ -1257,7 +1266,7 @@ Public Class NotBasicParser
             From op In OrKeyword
             From _lc In LineContinuation
             From right In XorExpression
-            Select New BinaryExpression(ExpressionOp.Or, left, right).ToExpression()
+            Select New BinaryExpression(ExpressionOp.Or, left, right).ToBase()
 
         Dim FreeLambdaParameter = ParameterDeclaration
         Dim LambdaParameterListDecl =
@@ -1282,7 +1291,7 @@ Public Class NotBasicParser
             From _arrow In Arrow
             From _lc In LineContinuation
             From body In LambdaBody
-            Select New LambdaExpression(signature, body).ToExpression
+            Select New LambdaExpression(signature, body).ToBase
 
         LambdaBody.Rule =
             (From exp In Expression
