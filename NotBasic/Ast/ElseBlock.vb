@@ -1,6 +1,6 @@
 ﻿
 Class ElseBlock
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _elsePart As IEnumerable(Of Statement)
 

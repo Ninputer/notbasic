@@ -1,6 +1,6 @@
 ﻿
 Public Class ConcreteDeclaration
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _typeParams As IEnumerable(Of TypeParameter)
     Private _conceptName As UnifiedIdentifer

@@ -1,6 +1,6 @@
 ﻿
 Public Class ConceptConstraintClause
-
+    Inherits SyntaxTreeNode
     Private _conceptName As UnifiedIdentifer
     Private _types As IEnumerable(Of TypeName)
 

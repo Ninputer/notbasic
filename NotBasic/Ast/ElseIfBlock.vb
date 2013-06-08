@@ -1,6 +1,6 @@
 ﻿
 Class ElseIfBlock
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _condition As Expression
     Private _elseIfTruePart As IEnumerable(Of Statement)

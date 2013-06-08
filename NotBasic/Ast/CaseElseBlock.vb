@@ -1,7 +1,7 @@
 ﻿Imports VBF.Compilers
 
 Public Class CaseElseBlock
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _sourceSpan1 As Compilers.SourceSpan
     Private _caseBody As IEnumerable(Of Statement)

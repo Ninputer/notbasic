@@ -1,7 +1,7 @@
 ﻿Imports VBF.Compilers
 
 Public Class CaseBlock
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As SourceSpan
     Private _expList As IEnumerable(Of Expression)
     Private _caseBody As IEnumerable(Of Statement)

@@ -1,6 +1,6 @@
 ﻿
 Public Class ParameterDeclaration
-
+    Inherits SyntaxTreeNode
     Private _did As UnifiedIdentifer
     Private _typesp As TypeSpecifier
     Private _parameterPrefix As ParameterPrefix

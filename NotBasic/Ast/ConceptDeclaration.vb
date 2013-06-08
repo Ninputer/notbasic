@@ -1,6 +1,6 @@
 ﻿
 Public Class ConceptDeclaration
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _name As UnifiedIdentifer
     Private _typeParams As IEnumerable(Of TypeParameter)

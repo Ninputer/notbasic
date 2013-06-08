@@ -438,7 +438,7 @@ Public Class NotBasicParser
     Private LambdaSignature As New Production(Of LambdaSignature)
     Private ArrayLiteralExpression As New Production(Of Expression)
 
-    Private ArgumentList As New Production(Of ArgumentList)
+    Private ArgumentList As New Production(Of IEnumerable(Of Argument))
 
     Protected Overrides Sub OnDefineParserErrors(errorDefinition As SyntaxErrors, errorManager As CompilationErrorManager)
         With errorDefinition
@@ -474,6 +474,7 @@ Public Class NotBasicParser
         'DONE: array literal
         'DONE: array type specifier
         'TODO: runtime concept choose
+        'TODO: type constraint clause
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -1312,8 +1313,7 @@ Public Class NotBasicParser
         Expression.Rule = OrExpression Or LambdaExpression
 
         ArgumentList.Rule =
-            From list In Expression.Many(Comma.Concat(LineContinuation))
-            Select New ArgumentList(list.Select(Function(exp) New Argument(exp)))
+             Expression.Select(Function(exp) New Argument(exp)).Many(Comma.Concat(LineContinuation))
 
         ScannerInfo.CurrentLexerIndex = m_keywordLexerIndex
 

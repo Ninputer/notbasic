@@ -1,6 +1,6 @@
 ﻿
 Public Class TypeParameter
-
+    Inherits SyntaxTreeNode
     Private _name As UnifiedIdentifer
     Private _dimension As Nullable(Of Integer)
 

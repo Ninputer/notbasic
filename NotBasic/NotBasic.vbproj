@@ -79,7 +79,6 @@
   <ItemGroup>
     <Compile Include="ArrayLiteralExpression.vb" />
     <Compile Include="Ast\Argument.vb" />
-    <Compile Include="Ast\ArgumentList.vb" />
     <Compile Include="Ast\ArrayTypeName.vb" />
     <Compile Include="Ast\AssignmentStatement.vb" />
     <Compile Include="Ast\DoLoopStatement.vb" />
@@ -112,7 +111,6 @@
     <Compile Include="Ast\IfThenStatement.vb" />
     <Compile Include="Ast\PrimitiveTypeName.vb" />
     <Compile Include="Ast\QualifiedTypeName.vb" />
-    <Compile Include="Ast\ReferenceIdentifier.vb" />
     <Compile Include="Ast\ReturnStatement.vb" />
     <Compile Include="Ast\Statement.vb" />
     <Compile Include="Ast\TypeName.vb" />

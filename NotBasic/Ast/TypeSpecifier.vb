@@ -1,6 +1,6 @@
 ﻿
 Public Class TypeSpecifier
-
+    Inherits SyntaxTreeNode
     Private _spTypeName As TypeName
 
     Sub New(spTypeName As TypeName)

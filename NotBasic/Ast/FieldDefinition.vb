@@ -1,6 +1,6 @@
 ﻿
 Public Class FieldDefinition
-
+    Inherits SyntaxTreeNode
     Private _fieldName As UnifiedIdentifer
     Private _typeSp As TypeSpecifier
 

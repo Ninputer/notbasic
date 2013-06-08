@@ -1,6 +1,6 @@
 ﻿
 Class Argument
-
+    Inherits SyntaxTreeNode
     Private _exp As Expression
 
     Sub New(exp As Expression)

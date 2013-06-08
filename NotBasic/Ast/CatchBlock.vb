@@ -1,6 +1,6 @@
 ﻿
 Public Class CatchBlock
-
+    Inherits SyntaxTreeNode
     Private _sourceSpan As Compilers.SourceSpan
     Private _exceptVar As UnifiedIdentifer
     Private _exceptType As TypeSpecifier

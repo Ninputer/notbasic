@@ -2,13 +2,10 @@
 Public Class CompilationUnit
     Inherits SyntaxTreeNode
 
-    Private m_definitions As IList(Of Definition)
+    Private m_definitions As IEnumerable(Of Definition)
 
     Sub New(definitions As IEnumerable(Of Definition))
-
-        If definitions Is Nothing Then Exit Sub
-
-        m_definitions = definitions.ToArray()
+        m_definitions = definitions
     End Sub
 
 End Class

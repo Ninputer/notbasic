@@ -1,4 +1,4 @@
 ﻿
-Class TypeConstraintClause
+Public Class TypeConstraintClause
 
 End Class

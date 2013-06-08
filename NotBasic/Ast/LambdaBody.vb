@@ -1,5 +1,6 @@
 ﻿
 Public MustInherit Class LambdaBody
+    Inherits SyntaxTreeNode
     Public Function ToLambdaBody() As LambdaBody
         Return Me
     End Function
