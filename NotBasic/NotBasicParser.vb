@@ -436,6 +436,7 @@ Public Class NotBasicParser
     Private LambdaExpression As New Production(Of Expression)
     Private LambdaBody As New Production(Of LambdaBody)
     Private LambdaSignature As New Production(Of LambdaSignature)
+    Private ArrayLiteralExpression As New Production(Of Expression)
 
     Private ArgumentList As New Production(Of ArgumentList)
 
@@ -470,7 +471,7 @@ Public Class NotBasicParser
         'DONE: type inheritence
         'DONE: dispatch method
         'DONE: concept default implementation
-        'TODO: array literal
+        'DONE: array literal
         'DONE: array type specifier
         'TODO: runtime concept choose
 
@@ -1072,6 +1073,14 @@ Public Class NotBasicParser
             From cl In CharLiteral
             Select New CharLiteral(cl).ToBase
 
+        ArrayLiteralExpression.Rule =
+            From _lbk In LeftBrck
+            From _lc1 In LineContinuation
+            From expList In Expression.Many(Comma.Concat(LineContinuation))
+            From _lc2 In LineContinuation
+            From _rbk In RightBrck
+            Select New ArrayLiteralExpression(expList).ToBase
+
         ReferenceExpression.Rule =
             From id In ReferenceIdentifier
             From typeArgs In TypeArguments.Optional
@@ -1103,6 +1112,7 @@ Public Class NotBasicParser
             BooleanLiteralExpression Or
             StringLiteralExpression Or
             CharLiteralExpression Or
+            ArrayLiteralExpression Or
             ReferenceExpression Or
             MemberAccessExpression Or
             Expression.PackedBy(LeftPth, RightPth)

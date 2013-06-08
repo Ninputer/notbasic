@@ -19,6 +19,8 @@ fun Bar(f:fun(int)int, g:fun())
 end
 
 operator+(a:int, b:int):List<int>
+    a = cast:int b
+    a = cast:Point<int> b
     return a
 end
 
@@ -154,6 +156,12 @@ fun SelectCaseStatement()
         case a > 0
         case else
     end
+end
+
+fun ArrayLiteral()
+    a = []
+    b = [1]
+    c = ["x","y","z"]
 end
 
 concept Functor<F<>>
