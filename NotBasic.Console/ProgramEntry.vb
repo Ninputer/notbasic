@@ -234,6 +234,11 @@ end
         System.Console.WriteLine("Parser creation time: {0}ms", parser.ParserCreationTime)
 
         ReportErrors(em)
+
+        If em.Errors.Count = 0 Then
+            Dim dump = s.ToString()
+            Stop
+        End If
     End Sub
 
     Sub ReportErrors(errorManager As CompilationErrorManager)

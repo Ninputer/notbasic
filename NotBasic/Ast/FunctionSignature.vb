@@ -3,9 +3,6 @@
 Public Class FunctionSignature
     Inherits ProcedureSignature
 
-    Private m_sourceSpan As Compilers.SourceSpan
-    Private m_name As UnifiedIdentifer
-    Private m_paramlist As IList(Of ParameterDeclaration)
     Private _sourceSpan As Compilers.SourceSpan
     Private _name As UnifiedIdentifer
     Private _paramlist As IEnumerable(Of ParameterDeclaration)

@@ -1053,7 +1053,7 @@ Public Class NotBasicParser
         '=======================================================================
         IntegerLiteralExpression.Rule =
             From literal In IntegerLiteral
-            Select New IntegerLiteralExpression(literal).ToBase
+            Select New IntegerLiteralExpression(literal.Value).ToBase
 
         FloatLiteralExpression.Rule =
             From literal In FloatLiteral
