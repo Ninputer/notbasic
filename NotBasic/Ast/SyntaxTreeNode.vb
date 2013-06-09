@@ -105,6 +105,8 @@ Public MustInherit Class SyntaxTreeNode
                 Dim id = DirectCast(field.GetValue(obj), UnifiedIdentifer)
                 If id IsNot Nothing Then
                     helper.AppendLineString(id.Identifier)
+                Else
+                    helper.AppendLineString(Nothing)
                 End If
             ElseIf GetType(SyntaxTreeNode).IsAssignableFrom(field.FieldType) Then
                 'field is syntax node
@@ -124,6 +126,8 @@ Public MustInherit Class SyntaxTreeNode
                 Dim z = DirectCast(field.GetValue(obj), LexemeValue)
                 If z IsNot Nothing Then
                     helper.AppendLineString(z.Content)
+                Else
+                    helper.AppendLineString(Nothing)
                 End If
             ElseIf field.FieldType.Equals(GetType(ExpressionOp)) Then
                 helper.AddStringNoReturn(field.Name)
