@@ -8,10 +8,10 @@ Public Class FunctionSignature
     Private _paramlist As IEnumerable(Of ParameterDeclaration)
     Private _returnTypeSp As TypeSpecifier
     Private _typeParams As IEnumerable(Of TypeParameter)
-    Private _whereClauses As IEnumerable(Of ConceptConstraintClause)
+    Private _whereClauses As IEnumerable(Of ConstraintClause)
 
   
-    Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier, typeParams As IEnumerable(Of TypeParameter), whereClauses As IEnumerable(Of ConceptConstraintClause))
+    Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier, typeParams As IEnumerable(Of TypeParameter), whereClauses As IEnumerable(Of ConstraintClause))
         ' TODO: Complete member initialization 
         _sourceSpan = sourceSpan
         _name = name

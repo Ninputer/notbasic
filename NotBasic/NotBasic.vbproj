@@ -81,6 +81,7 @@
     <Compile Include="Ast\Argument.vb" />
     <Compile Include="Ast\ArrayTypeName.vb" />
     <Compile Include="Ast\AssignmentStatement.vb" />
+    <Compile Include="Ast\ConstraintClause.vb" />
     <Compile Include="Ast\DoLoopStatement.vb" />
     <Compile Include="Ast\ElseBlock.vb" />
     <Compile Include="Ast\ElseIfBlock.vb" />

@@ -189,6 +189,10 @@ concept EqualityComparable<T>
     end    
 end
 
+concept Addable<TA,TB,TR> where (TA,TB => TR)
+    declare operator+(a:TA, b:TB):TR
+end
+
 concrete Comparable<int>
     fun Compare(a,b)
         return a - b

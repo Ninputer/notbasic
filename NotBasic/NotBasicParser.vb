@@ -376,9 +376,9 @@ Public Class NotBasicParser
 
     Private ConceptDeclaration As New Production(Of ConceptDeclaration)
     Private ConceptDefinition As New Production(Of ConceptDefinition)
-    Private ConstraintClauses As New Production(Of IEnumerable(Of ConceptConstraintClause))
-    Private ConceptConstraintClause As New Production(Of ConceptConstraintClause)
-    Private TypeConstraintClause As New Production(Of TypeConstraintClause)
+    Private ConstraintClauses As New Production(Of IEnumerable(Of ConstraintClause))
+    Private ConceptConstraintClause As New Production(Of ConstraintClause)
+    Private TypeConstraintClause As New Production(Of ConstraintClause)
     Private ConcreteDeclaration As New Production(Of ConcreteDeclaration)
     Private ConcreteDefinition As New Production(Of ConcreteDefinition)
     Private ProcedureDeclaration As New Production(Of ProcedureDeclaration)
@@ -474,7 +474,7 @@ Public Class NotBasicParser
         'DONE: array literal
         'DONE: array type specifier
         'TODO: runtime concept choose
-        'TODO: type constraint clause
+        'DONE: type constraint clause
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -731,18 +731,29 @@ Public Class NotBasicParser
             From _st In ST
             Select New ConceptDeclaration(_concept.Value.Span, name, typeParams, whereClauses)
 
+        Dim ConstraintClause = ConceptConstraintClause Or TypeConstraintClause
+
         ConstraintClauses.Rule =
             From _where In WhereKeyword
             From _lc In LineContinuation
-            From constraints In ConceptConstraintClause.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
+            From constraints In ConstraintClause.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
             Select constraints
 
         ConceptConstraintClause.Rule =
             From conceptName In ReferenceIdentifier
             From typeArgs In TypeArguments
-            Select New ConceptConstraintClause(conceptName, typeArgs)
+            Select New ConceptConstraintClause(conceptName, typeArgs).ToBase
 
-        'TODO: TypeConstraintClause
+        '(A,B => C,D)
+        TypeConstraintClause.Rule =
+            From _lph In LeftPth
+            From _lc1 In LineContinuation
+            From leftTypes In ReferenceIdentifier.Many1(Comma.Concat(LineContinuation))
+            From _arrow In Arrow
+            From _lc2 In LineContinuation
+            From rightTypes In ReferenceIdentifier.Many1(Comma.Concat(LineContinuation))
+            From _rph In RightPth
+            Select New TypeConstraintClause(leftTypes, rightTypes).ToBase
 
         ConcreteDeclaration.Rule =
             From _concrete In ConcreteKeyword

@@ -5,9 +5,9 @@ Public Class ConcreteDeclaration
     Private _typeParams As IEnumerable(Of TypeParameter)
     Private _conceptName As UnifiedIdentifer
     Private _typeArgs As IEnumerable(Of TypeName)
-    Private _whereClauses As IEnumerable(Of ConceptConstraintClause)
+    Private _whereClauses As IEnumerable(Of ConstraintClause)
 
-    Sub New(sourceSpan As Compilers.SourceSpan, typeParams As IEnumerable(Of TypeParameter), conceptName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName), whereClauses As IEnumerable(Of ConceptConstraintClause))
+    Sub New(sourceSpan As Compilers.SourceSpan, typeParams As IEnumerable(Of TypeParameter), conceptName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName), whereClauses As IEnumerable(Of ConstraintClause))
         ' TODO: Complete member initialization 
         _sourceSpan = sourceSpan
         _typeParams = typeParams
