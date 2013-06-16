@@ -1,4 +1,4 @@
-﻿Public Class ConstraintClause
+﻿Public MustInherit Class ConstraintClause
     Inherits SyntaxTreeNode
 
     Public Function ToBase() As ConstraintClause

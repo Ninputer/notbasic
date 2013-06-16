@@ -1,16 +1,18 @@
 ﻿Imports VBF.Compilers
 
-Class CastExpression
-    Inherits UnaryExpression
+Public Class CastExpression
+    Inherits Expression
 
     Private _exp As Expression
     Private _typesp As TypeSpecifier
 
     Sub New(opSpan As SourceSpan, exp As Expression, typesp As TypeSpecifier)
-        MyBase.New(opSpan, ExpressionOp.Cast, exp)
         ' TODO: Complete member initialization 
         _exp = exp
         _typesp = typesp
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

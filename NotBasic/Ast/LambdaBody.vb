@@ -16,6 +16,9 @@ Public Class ExpressionLambdaBody
         _exp = exp
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class
 
 Public Class BlockLambdaBody
@@ -28,4 +31,7 @@ Public Class BlockLambdaBody
         _block = block
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

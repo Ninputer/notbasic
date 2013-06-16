@@ -1,16 +1,18 @@
 ﻿
-Class BinaryExpression
+Public Class BinaryExpression
     Inherits Expression
 
-    Private _expressionOp As ExpressionOp
-    Private _left As Expression
-    Private _right As Expression
+    Private m_op As ExpressionOp
+    Private m_left As Expression
+    Private m_right As Expression
 
-    Sub New(expressionOp As ExpressionOp, left As Expression, right As Expression)
-        ' TODO: Complete member initialization 
-        _expressionOp = expressionOp
-        _left = left
-        _right = right
+    Sub New(op As ExpressionOp, left As Expression, right As Expression)
+        m_op = op
+        m_left = left
+        m_right = right
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

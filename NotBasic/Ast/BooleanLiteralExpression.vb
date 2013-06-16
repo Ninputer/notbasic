@@ -1,13 +1,15 @@
 ﻿Imports VBF.Compilers.Scanners
 
-Class BooleanLiteralExpression
+Public Class BooleanLiteralExpression
     Inherits Expression
 
-    Private _lexemeValue As LexemeValue
+    Private m_value As LexemeValue
 
-    Sub New(lexemeValue As LexemeValue)
-        ' TODO: Complete member initialization 
-        _lexemeValue = lexemeValue
+    Sub New(value As LexemeValue)
+        m_value = value
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

@@ -1,6 +1,6 @@
 ﻿
 Public Class EnumElement
-    Inherits SyntaxTreeNode
+    Inherits SyntaxTreeData
     Private _elementName As UnifiedIdentifer
     Private _elementValue As Compilers.Scanners.LexemeValue
 

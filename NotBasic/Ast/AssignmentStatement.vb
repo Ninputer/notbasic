@@ -1,14 +1,16 @@
 ﻿
-Class AssignmentStatement
+Public Class AssignmentStatement
     Inherits Statement
 
-    Private _id As UnifiedIdentifer
-    Private _value As Expression
+    Private m_identifier As UnifiedIdentifer
+    Private m_value As Expression
 
-    Sub New(id As UnifiedIdentifer, value As Expression)
-        ' TODO: Complete member initialization 
-        _id = id
-        _value = value
+    Sub New(identifier As UnifiedIdentifer, value As Expression)
+        m_identifier = identifier
+        m_value = value
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

@@ -1,7 +1,7 @@
 ﻿Imports VBF.Compilers.Scanners
 
 Public Class ParameterPrefix
-    Inherits SyntaxTreeNode
+    Inherits SyntaxTreeData
     Private _lexemeValue As LexemeValue
 
     Sub New(lexemeValue As LexemeValue)

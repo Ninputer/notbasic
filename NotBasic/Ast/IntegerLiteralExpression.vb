@@ -1,6 +1,6 @@
 ﻿Imports VBF.Compilers.Scanners
 
-Class IntegerLiteralExpression
+Public Class IntegerLiteralExpression
     Inherits Expression
 
     Private _literal As LexemeValue
@@ -10,4 +10,7 @@ Class IntegerLiteralExpression
         _literal = literal
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

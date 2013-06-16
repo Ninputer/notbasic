@@ -1,5 +1,5 @@
 ﻿
-Class IfThenStatement
+Public Class IfThenStatement
     Inherits Statement
 
     Private _sourceSpan As Compilers.SourceSpan
@@ -15,4 +15,7 @@ Class IfThenStatement
         _elsePart = elsePart
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

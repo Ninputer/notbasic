@@ -1,5 +1,5 @@
 ﻿
-Public Class Expression
+Public MustInherit Class Expression
     Inherits SyntaxTreeNode
     Public Function ToBase() As Expression
         Return Me

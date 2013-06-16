@@ -77,31 +77,34 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayLiteralExpression.vb" />
+    <Compile Include="Ast\ArrayLiteralExpression.vb" />
     <Compile Include="Ast\Argument.vb" />
     <Compile Include="Ast\ArrayTypeName.vb" />
     <Compile Include="Ast\AssignmentStatement.vb" />
     <Compile Include="Ast\ConstraintClause.vb" />
     <Compile Include="Ast\DoLoopStatement.vb" />
-    <Compile Include="Ast\ElseBlock.vb" />
-    <Compile Include="Ast\ElseIfBlock.vb" />
+    <Compile Include="Ast\DataNode\ElseBlock.vb" />
+    <Compile Include="Ast\DataNode\ElseIfBlock.vb" />
     <Compile Include="Ast\CastExpression.vb" />
     <Compile Include="Ast\ConceptDeclaration.vb" />
     <Compile Include="Ast\ConceptConstraintClause.vb" />
     <Compile Include="Ast\ConcreteDeclaration.vb" />
     <Compile Include="Ast\Definition.vb" />
+    <Compile Include="Ast\FormatHelper.vb" />
+    <Compile Include="Ast\ISyntaxTreeVisitor.vb" />
     <Compile Include="Ast\ProcedureDeclaration.vb" />
     <Compile Include="Ast\ConceptDefinition.vb" />
     <Compile Include="Ast\ConcreteDefinition.vb" />
     <Compile Include="Ast\ContinueStatement.vb" />
-    <Compile Include="Ast\CatchBlock.vb" />
+    <Compile Include="Ast\DataNode\CatchBlock.vb" />
     <Compile Include="Ast\ProcedureSignature.vb" />
     <Compile Include="Ast\StringLiteral.vb" />
     <Compile Include="Ast\CharLiteral.vb" />
     <Compile Include="Ast\EnumDefinition.vb" />
-    <Compile Include="Ast\EnumElement.vb" />
-    <Compile Include="Ast\CaseBlock.vb" />
-    <Compile Include="Ast\CaseElseBlock.vb" />
+    <Compile Include="Ast\DataNode\EnumElement.vb" />
+    <Compile Include="Ast\DataNode\CaseBlock.vb" />
+    <Compile Include="Ast\DataNode\CaseElseBlock.vb" />
+    <Compile Include="Ast\DataNode\SyntaxTreeData.vb" />
     <Compile Include="ErrorCode.vb" />
     <Compile Include="Ast\ExitStatement.vb" />
     <Compile Include="Ast\Expression.vb" />
@@ -115,7 +118,7 @@
     <Compile Include="Ast\ReturnStatement.vb" />
     <Compile Include="Ast\Statement.vb" />
     <Compile Include="Ast\TypeName.vb" />
-    <Compile Include="Ast\UnifiedIdentifer.vb" />
+    <Compile Include="Ast\DataNode\UnifiedIdentifer.vb" />
     <Compile Include="Ast\IntegerLiteralExpression.vb" />
     <Compile Include="Ast\BinaryExpression.vb" />
     <Compile Include="Ast\BooleanLiteralExpression.vb" />
@@ -124,7 +127,7 @@
     <Compile Include="Ast\ExpressionStatement.vb" />
     <Compile Include="Ast\FloatLiteralExpression.vb" />
     <Compile Include="Ast\FieldDefinition.vb" />
-    <Compile Include="Ast\FinallyBlock.vb" />
+    <Compile Include="Ast\DataNode\FinallyBlock.vb" />
     <Compile Include="Ast\ForEachStatement.vb" />
     <Compile Include="Ast\ForStatement.vb" />
     <Compile Include="Ast\FunctionTypeName.vb" />
@@ -141,14 +144,14 @@
     <Compile Include="Ast\SyntaxTreeNode.vb" />
     <Compile Include="Ast\ReferenceExpression.vb" />
     <Compile Include="Ast\UnaryExpression.vb" />
-    <Compile Include="Ast\TypeSpecifier.vb" />
-    <Compile Include="Ast\TypeParameter.vb" />
+    <Compile Include="Ast\DataNode\TypeSpecifier.vb" />
+    <Compile Include="Ast\DataNode\TypeParameter.vb" />
     <Compile Include="Ast\TypeConstraintClause.vb" />
     <Compile Include="Ast\OperatorSignature.vb" />
     <Compile Include="Ast\OperatorDefinition.vb" />
     <Compile Include="Ast\TypeDefinition.vb" />
     <Compile Include="Ast\TryStatement.vb" />
-    <Compile Include="Ast\ParameterPrefix.vb" />
+    <Compile Include="Ast\DataNode\ParameterPrefix.vb" />
     <Compile Include="Ast\SelectCaseStatement.vb" />
     <Compile Include="Ast\NothingExpression.vb" />
   </ItemGroup>

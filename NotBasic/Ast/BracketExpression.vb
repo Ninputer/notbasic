@@ -1,14 +1,16 @@
 ﻿
-Class BracketExpression
+Public Class BracketExpression
     Inherits Expression
 
-    Private _indexable As Object
-    Private _arguments As IEnumerable(Of Argument)
+    Private m_object As Object
+    Private m_arguments As IEnumerable(Of Argument)
 
     Sub New(indexable As Object, arguments As IEnumerable(Of Argument))
-        ' TODO: Complete member initialization 
-        _indexable = indexable
-        _arguments = arguments
+        m_object = indexable
+        m_arguments = arguments
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

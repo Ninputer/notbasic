@@ -1,4 +1,4 @@
-﻿Public Class ProcedureSignature
+﻿Public MustInherit Class ProcedureSignature
     Inherits SyntaxTreeNode
     Public Function ToBase() As ProcedureSignature
         Return Me

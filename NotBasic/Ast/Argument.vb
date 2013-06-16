@@ -1,11 +1,13 @@
 ﻿
-Class Argument
+Public Class Argument
     Inherits SyntaxTreeNode
-    Private _exp As Expression
+    Private m_argexp As Expression
 
-    Sub New(exp As Expression)
-        ' TODO: Complete member initialization 
-        _exp = exp
+    Sub New(argexp As Expression)
+        m_argexp = argexp
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

@@ -2,7 +2,7 @@
 Imports VBF.Compilers
 
 Public Class UnifiedIdentifer
-    Inherits SyntaxTreeNode
+    Inherits SyntaxTreeData
     Private m_identifier As LexemeValue
     Private m_escaped As Boolean
 

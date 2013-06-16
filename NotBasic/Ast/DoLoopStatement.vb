@@ -1,6 +1,6 @@
 ﻿Imports VBF.Compilers
 
-Class DoLoopStatement
+Public Class DoLoopStatement
     Inherits Statement
 
     Shared Function DoLoopFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, loopBody As IEnumerable(Of Statement)) As Statement
@@ -23,4 +23,7 @@ Class DoLoopStatement
         Return New DoLoopStatement
     End Function
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class

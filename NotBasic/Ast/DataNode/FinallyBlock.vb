@@ -1,6 +1,6 @@
 ﻿
 Public Class FinallyBlock
-    Inherits SyntaxTreeNode
+    Inherits SyntaxTreeData
     Private _sourceSpan As Compilers.SourceSpan
     Private _finallyBody As IEnumerable(Of Statement)
 

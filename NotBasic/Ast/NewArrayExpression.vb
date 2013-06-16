@@ -1,5 +1,5 @@
 ﻿
-Class NewArrayExpression
+Public Class NewArrayExpression
     Inherits Expression
 
     Private _sourceSpan As Compilers.SourceSpan
@@ -17,4 +17,7 @@ Class NewArrayExpression
         _length = length
     End Sub
 
+    Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
+        Return visitor.Visit(Me)
+    End Function
 End Class
