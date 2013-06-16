@@ -50,6 +50,7 @@ Public Class NotBasicParser
     Private SelectKeyword As Token
     Private CaseKeyword As Token
     Private NothingKeyword As Token
+    Private ObjectKeyword As Token
     Private AndKeyword As Token
     Private OrKeyword As Token
     Private NotKeyword As Token
@@ -308,6 +309,7 @@ Public Class NotBasicParser
             SelectKeyword = .DefineToken(Literal("select"))
             CaseKeyword = .DefineToken(Literal("case"))
             NothingKeyword = .DefineToken(Literal("nothing"))
+            ObjectKeyword = .DefineToken(Literal("object"))
             AndKeyword = .DefineToken(Literal("and"))
             OrKeyword = .DefineToken(Literal("or"))
             NotKeyword = .DefineToken(Literal("not"))
@@ -428,6 +430,7 @@ Public Class NotBasicParser
     Private BooleanLiteralExpression As New Production(Of Expression)
     Private StringLiteralExpression As New Production(Of Expression)
     Private CharLiteralExpression As New Production(Of Expression)
+    Private NothingExpression As New Production(Of Expression)
     Private NewArrayExpression As New Production(Of Expression)
     Private ReferenceExpression As New Production(Of Expression)
     Private MemberAccessExpression As New Production(Of Expression)
@@ -473,8 +476,10 @@ Public Class NotBasicParser
         'DONE: concept default implementation
         'DONE: array literal
         'DONE: array type specifier
-        'TODO: runtime concept choose
         'DONE: type constraint clause
+        'DONE: object type
+        'DONE: nothing literal
+        'TODO: new object expression?
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -559,7 +564,8 @@ Public Class NotBasicParser
                                               ByteKeyword,
                                               LongKeyword,
                                               CharKeyword,
-                                              StringKeyword)
+                                              StringKeyword,
+                                              ObjectKeyword)
             Select DirectCast(New PrimitiveTypeName(typeKeyword.Value), TypeName)
 
         'fun(paramType)returnType
@@ -1085,6 +1091,10 @@ Public Class NotBasicParser
             From cl In CharLiteral
             Select New CharLiteral(cl).ToBase
 
+        NothingExpression.Rule =
+            From _nothing In NothingKeyword
+            Select New NothingExpression(_nothing.Value.Span).ToBase
+
         ArrayLiteralExpression.Rule =
             From _lbk In LeftBrck
             From _lc1 In LineContinuation
@@ -1124,6 +1134,7 @@ Public Class NotBasicParser
             BooleanLiteralExpression Or
             StringLiteralExpression Or
             CharLiteralExpression Or
+            NothingExpression Or
             ArrayLiteralExpression Or
             ReferenceExpression Or
             MemberAccessExpression Or

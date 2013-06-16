@@ -241,7 +241,7 @@ end
 
         If em.Errors.Count = 0 Then
             Dim dump = s.ToString()
-            Stop
+            'System.Console.WriteLine(dump)
         End If
     End Sub
 

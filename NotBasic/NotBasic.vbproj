@@ -150,6 +150,7 @@
     <Compile Include="Ast\TryStatement.vb" />
     <Compile Include="Ast\ParameterPrefix.vb" />
     <Compile Include="Ast\SelectCaseStatement.vb" />
+    <Compile Include="Ast\NothingExpression.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
