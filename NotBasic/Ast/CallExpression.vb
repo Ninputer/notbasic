@@ -2,13 +2,12 @@
 Public Class CallExpression
     Inherits Expression
 
-    Private _callable As Object
-    Private _arguments As IEnumerable(Of Argument)
+    Private m_object As Expression
+    Private m_arguments As IEnumerable(Of Argument)
 
-    Sub New(callable As Object, arguments As IEnumerable(Of Argument))
-        ' TODO: Complete member initialization 
-        _callable = callable
-        _arguments = arguments
+    Sub New(obj As Expression, arguments As IEnumerable(Of Argument))
+        m_object = obj
+        m_arguments = arguments
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

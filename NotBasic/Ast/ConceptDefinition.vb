@@ -2,15 +2,14 @@
 Public Class ConceptDefinition
     Inherits Definition
 
-    Private _decl As ConceptDeclaration
-    Private _procedures As IEnumerable(Of Definition)
-    Private _sourceSpan As Compilers.SourceSpan
+    Private m_decl As ConceptDeclaration
+    Private m_procedures As IEnumerable(Of Definition)
+    Private m_endKeywordSpan As Compilers.SourceSpan
 
-    Sub New(decl As ConceptDeclaration, procedures As IEnumerable(Of Definition), sourceSpan As Compilers.SourceSpan)
-        ' TODO: Complete member initialization 
-        _decl = decl
-        _procedures = procedures
-        _sourceSpan = sourceSpan
+    Sub New(decl As ConceptDeclaration, procedures As IEnumerable(Of Definition), endKeywordSpan As Compilers.SourceSpan)
+        m_decl = decl
+        m_procedures = procedures
+        m_endKeywordSpan = endKeywordSpan
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

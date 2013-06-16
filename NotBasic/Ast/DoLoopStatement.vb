@@ -3,23 +3,23 @@
 Public Class DoLoopStatement
     Inherits Statement
 
-    Shared Function DoLoopFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, loopBody As IEnumerable(Of Statement)) As Statement
+    Shared Function DoLoopFrom(doKeywordSpan As SourceSpan, loopKeywordSpan As SourceSpan, loopBody As IEnumerable(Of Statement)) As Statement
         Return New DoLoopStatement
     End Function
 
-    Shared Function DoWhileLoopFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, sourceSpan2 As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
+    Shared Function DoWhileLoopFrom(doKeywordSpan As SourceSpan, whileKeywordSpan As SourceSpan, loopKeywordSpan As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
         Return New DoLoopStatement
     End Function
 
-    Shared Function DoUntilLoopFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, sourceSpan2 As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
+    Shared Function DoUntilLoopFrom(doKeywordSpan As SourceSpan, untilKeywordSpan As SourceSpan, loopKeywordSpan As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
         Return New DoLoopStatement
     End Function
 
-    Shared Function DoLoopWhileFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, sourceSpan2 As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
+    Shared Function DoLoopWhileFrom(doKeywordSpan As SourceSpan, whileKeywordSpan As SourceSpan, loopKeywordSpan As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
         Return New DoLoopStatement
     End Function
 
-    Shared Function DoLoopUntilFrom(sourceSpan As SourceSpan, sourceSpan1 As SourceSpan, sourceSpan2 As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
+    Shared Function DoLoopUntilFrom(doKeywordSpan As SourceSpan, untilKeywordSpan As SourceSpan, loopKeywordSpan As SourceSpan, condition As Expression, loopBody As IEnumerable(Of Statement)) As Statement
         Return New DoLoopStatement
     End Function
 

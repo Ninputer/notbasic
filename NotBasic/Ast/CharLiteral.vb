@@ -1,12 +1,12 @@
-﻿
+﻿Imports VBF.Compilers.Scanners
+
 Public Class CharLiteral
     Inherits Expression
 
-    Private _cl As Compilers.Scanners.Lexeme
+    Private m_value As LexemeValue
 
-    Sub New(cl As Compilers.Scanners.Lexeme)
-        ' TODO: Complete member initialization 
-        _cl = cl
+    Sub New(value As LexemeValue)
+        m_value = value
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

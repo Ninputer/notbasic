@@ -3,13 +3,14 @@
 Public Class CastExpression
     Inherits Expression
 
-    Private _exp As Expression
-    Private _typesp As TypeSpecifier
+    Private m_keywordSpan As SourceSpan
+    Private m_exp As Expression
+    Private m_targetType As TypeSpecifier
 
-    Sub New(opSpan As SourceSpan, exp As Expression, typesp As TypeSpecifier)
-        ' TODO: Complete member initialization 
-        _exp = exp
-        _typesp = typesp
+    Sub New(keywordSpan As SourceSpan, exp As Expression, targetType As TypeSpecifier)
+        m_keywordSpan = keywordSpan
+        m_exp = exp
+        m_targetType = targetType
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

@@ -4,13 +4,12 @@ Imports VBF.Compilers
 Public Class ContinueStatement
     Inherits Statement
 
-    Private _sourceSpan As SourceSpan
-    Private _lexemeValue As LexemeValue
+    Private m_keywordSpan As SourceSpan
+    Private m_loopType As LexemeValue 'do, for
 
-    Sub New(sourceSpan As SourceSpan, lexemeValue As LexemeValue)
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _lexemeValue = lexemeValue
+    Sub New(keywordSpan As SourceSpan, loopType As LexemeValue)
+        m_keywordSpan = keywordSpan
+        m_loopType = loopType
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

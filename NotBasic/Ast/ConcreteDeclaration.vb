@@ -1,19 +1,18 @@
 ﻿
 Public Class ConcreteDeclaration
     Inherits SyntaxTreeNode
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _typeParams As IEnumerable(Of TypeParameter)
-    Private _conceptName As UnifiedIdentifer
-    Private _typeArgs As IEnumerable(Of TypeName)
-    Private _whereClauses As IEnumerable(Of ConstraintClause)
+    Private m_keywordSpan As Compilers.SourceSpan
+    Private m_typeParams As IEnumerable(Of TypeParameter)
+    Private m_conceptName As UnifiedIdentifer
+    Private m_typeArgs As IEnumerable(Of TypeName)
+    Private m_whereClauses As IEnumerable(Of ConstraintClause)
 
-    Sub New(sourceSpan As Compilers.SourceSpan, typeParams As IEnumerable(Of TypeParameter), conceptName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName), whereClauses As IEnumerable(Of ConstraintClause))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _typeParams = typeParams
-        _conceptName = conceptName
-        _typeArgs = typeArgs
-        _whereClauses = whereClauses
+    Sub New(keywordSpan As Compilers.SourceSpan, typeParams As IEnumerable(Of TypeParameter), conceptName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName), whereClauses As IEnumerable(Of ConstraintClause))
+        m_keywordSpan = keywordSpan
+        m_typeParams = typeParams
+        m_conceptName = conceptName
+        m_typeArgs = typeArgs
+        m_whereClauses = whereClauses
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

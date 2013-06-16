@@ -1089,7 +1089,7 @@ Public Class NotBasicParser
 
         CharLiteralExpression.Rule =
             From cl In CharLiteral
-            Select New CharLiteral(cl).ToBase
+            Select New CharLiteral(cl.Value).ToBase
 
         NothingExpression.Rule =
             From _nothing In NothingKeyword

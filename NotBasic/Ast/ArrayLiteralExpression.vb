@@ -2,11 +2,10 @@
 Public Class ArrayLiteralExpression
     Inherits Expression
 
-    Private _expList As IEnumerable(Of Expression)
+    Private m_valueList As IEnumerable(Of Expression)
 
-    Sub New(expList As IEnumerable(Of Expression))
-        ' TODO: Complete member initialization 
-        _expList = expList
+    Sub New(valueList As IEnumerable(Of Expression))
+        m_valueList = valueList
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
