@@ -1,5 +1,6 @@
 ﻿Imports VBF.Compilers
 Imports VBF.NotBasic.Compiler
+Imports System.IO
 
 Module ProgramEntry
 
@@ -175,7 +176,7 @@ end
 
 concept Comparable<T>
     declare fun Compare(a:T, b:T):int
-    declare operator<(a:T, b:T):boolean
+    declare operator<(a:T, b:T):bool
 end
 
 concept EqualityComparable<T>
@@ -243,6 +244,17 @@ end
             Dim dump = s.ToString()
             'System.Console.WriteLine(dump)
         End If
+
+        Using sr As New StreamReader("StdLib\stdconcepts.nb")
+            em.ClearErrors()
+
+            Dim ast = parser.Parse(sr)
+            ReportErrors(em)
+
+            Dim astStr = ast.ToString()
+
+            My.Computer.FileSystem.WriteAllText("stdconcepts.ast.txt", astStr, False)
+        End Using
     End Sub
 
     Sub ReportErrors(errorManager As CompilationErrorManager)

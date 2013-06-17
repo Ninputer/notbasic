@@ -101,7 +101,7 @@ Class FormatHelper
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendLineString(":")
 
-                ObjectToString(TryCast(field.GetValue(obj), SyntaxTreeNode))
+                ObjectToString(field.GetValue(obj))
             ElseIf GetType(IEnumerable(Of SyntaxTreeNode)).IsAssignableFrom(field.FieldType) OrElse
                 GetType(IEnumerable(Of SyntaxTreeData)).IsAssignableFrom(field.FieldType) Then
                 'field is syntax node list

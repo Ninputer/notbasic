@@ -1,0 +1,147 @@
+﻿
+'notbasic standard concepts
+'this file defines the concepts required by the language runtime
+
+'=====required by 'for each' statement=====
+
+concept Enumerable<T, TElement, TEnumerator> where Enumerator<TEnumerator, TElement>
+    declare fun GetEnumerator(obj:T): TEnumerator
+end
+
+concept Enumerator<T, TElement>
+    declare fun Current(e:T):TElement
+    declare fun MoveNext(e:T)
+end
+
+'=====overloadable operators=====
+
+'binary
+concept BinaryAdd<TA, TB, TR> where (TA, TB => TR)
+    declare operator+(a:TA, b:TB):TR
+end
+
+concept BinarySubstract<TA, TB, TR> where (TA, TB => TR)
+    declare operator-(a:TA, b:TB):TR
+end
+
+concept BinaryMultiply<TA, TB, TR> where (TA, TB => TR)
+    declare operator*(a:TA, b:TB):TR
+end
+
+concept BinaryDivide<TA, TB, TR> where (TA, TB => TR)
+    declare operator/(a:TA, b:TB):TR
+end
+
+concept BinaryModulo<TA, TB, TR> where (TA, TB => TR)
+    declare operator mod(a:TA, b:TB):TR
+end
+
+concept BinaryShiftLeft<TA, TB, TR> where (TA, TB => TR)
+    declare operator<<(a:TA, b:TB):TR
+end
+
+concept BinaryShiftRight<TA, TB, TR> where (TA, TB => TR)
+    declare operator>>(a:TA, b:TB):TR
+end
+
+concept BinaryEqual<TA, TB, TR> where (TA, TB => TR)
+    declare operator=(a:TA, b:TB):TR
+end
+
+concept BinaryNotEqual<TA, TB, TR> where (TA, TB => TR)
+    declare operator<>(a:TA, b:TB):TR
+end
+
+concept BinaryLess<TA, TB, TR> where (TA, TB => TR)
+    declare operator<(a:TA, b:TB):TR
+end
+
+concept BinaryLessEqual<TA, TB, TR> where (TA, TB => TR)
+    declare operator<=(a:TA, b:TB):TR
+end
+
+concept BinaryGreater<TA, TB, TR> where (TA, TB => TR)
+    declare operator>(a:TA, b:TB):TR
+end
+
+concept BinaryGreaterEqual<TA, TB, TR> where (TA, TB => TR)
+    declare operator>=(a:TA, b:TB):TR
+end
+
+concept BinaryAnd<TA, TB, TR> where (TA, TB => TR)
+    declare operator and(a:TA, b:TB):TR
+end
+
+concept BinaryOr<TA, TB, TR> where (TA, TB => TR)
+    declare operator or(a:TA, b:TB):TR
+end
+
+concept BinaryXor<TA, TB, TR> where (TA, TB => TR)
+    declare operator xor(a:TA, b:TB):TR
+end
+
+'unary
+concept UnaryPlus<T, TR> where (T => TR)
+    declare operator+(a:T):TR
+end
+
+concept UnaryMinus<T, TR> where (T => TR)
+    declare operator-(a:T):TR
+end
+
+concept UnaryNot<T, TR> where (T => TR)
+    declare operator not(a:T):TR
+end
+
+concept UnaryCast<TFrom, TTo>
+    declare operator cast(a:TFrom):TTo
+end
+
+'===== comparable =====
+concept Equality<T>
+    declare fun Equals(a:T, b:T):bool
+end
+
+concept EqualityOperators<T> where 
+    BinaryEqual<T, T, bool>,
+    BinaryNotEqual<T, T, bool>,
+    Equality<T>
+end
+
+concept Comparable<T> where Equality<T>
+    declare fun Compare(a:T, b:T):int
+    fun Min(a:T, b:T):T
+        if Compare(a, b) < 0 then return a else return b
+    end 
+end
+
+concept ComparableOperators<T> where 
+    EqualityOperators<T>,
+    BinaryLess<T, T, bool>,
+    BinaryLessEqual<T, T, bool>,
+    BinaryGreater<T, T, bool>,
+    BinaryGreaterEqual<T, T, bool>,
+    Comparable<T>
+end
+
+'===== numeric types =====
+concept Number<T> where
+    BinaryAdd<T, T, T>,
+    BinaryMultiply<T, T, T>,
+    BinarySubstract<T, T, T>,
+    UnaryMinus<T, T>,
+    UnaryPlus<T, T>
+                            
+    declare fun Abs(x:T):T
+    declare fun Sign(x:T):T
+end
+
+concept Real<T> where
+    Number<T>,
+    ComparableOperators<T>
+end
+
+concept Integral<T> where 
+    Real<T>,
+    BinaryModulo<T>
+end

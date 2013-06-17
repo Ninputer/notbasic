@@ -122,15 +122,11 @@ Public Class NotBasicParser
         'lexer with reserved keywords
         Dim keywordLexer = identifierLexer.CreateSubLexer()
 
-        'lexer for declaration modifiers
-        Dim declareLexer = keywordLexer.CreateSubLexer()
-
         'lexer for property body (get/set proc)
         Dim propertyLexer = keywordLexer.CreateSubLexer()
 
         m_identifierLexerIndex = identifierLexer.Index
         m_keywordLexerIndex = keywordLexer.Index
-        m_declareLexerIndex = declareLexer.Index
         m_propertyLexerIndex = propertyLexer.Index
 
         Dim lettersCategories As New HashSet(Of UnicodeCategory)() From
@@ -324,10 +320,6 @@ Public Class NotBasicParser
             StepKeyword = .DefineToken(Literal("step"))
             InKeyword = .DefineToken(Literal("in"))
             EnumKeyword = .DefineToken(Literal("enum"))
-        End With
-
-        'define contextual keywords for procedure declaration
-        With declareLexer
             DeclareKeyword = .DefineToken(Literal("declare"))
         End With
 
