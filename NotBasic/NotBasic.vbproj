@@ -91,7 +91,7 @@
     <Compile Include="Ast\ConcreteDeclaration.vb" />
     <Compile Include="Ast\Definition.vb" />
     <Compile Include="Ast\FormatHelper.vb" />
-    <Compile Include="Ast\ISyntaxTreeVisitor.vb" />
+    <Compile Include="ISyntaxTreeVisitor.vb" />
     <Compile Include="Ast\ProcedureDeclaration.vb" />
     <Compile Include="Ast\ConceptDefinition.vb" />
     <Compile Include="Ast\ConcreteDefinition.vb" />

@@ -440,6 +440,7 @@ Public Class NotBasicParser
             .LexicalErrorId = ErrorCode.InvalidToken
             .TokenMissingId = ErrorCode.MissingToken
             .TokenUnexpectedId = ErrorCode.UnexpectedToken
+            .TokenMistakeId = ErrorCode.TokenMistake
             .OtherErrorId = ErrorCode.GeneralSyntaxError
         End With
 
