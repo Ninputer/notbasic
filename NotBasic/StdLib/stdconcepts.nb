@@ -106,13 +106,25 @@ concept EqualityOperators<T> where
     BinaryEqual<T, T, bool>,
     BinaryNotEqual<T, T, bool>,
     Equality<T>
+
+    operator=(a, b)
+        return Equals(a, b)
+    end
+
+    operator<>(a, b)
+        return not Equals(a, b)
+    end
 end
 
 concept Comparable<T> where Equality<T>
     declare fun Compare(a:T, b:T):int
     fun Min(a:T, b:T):T
         if Compare(a, b) < 0 then return a else return b
-    end 
+    end
+
+    fun Max(a:T, b:T):T
+        if Compare(a, b) < 0 then return b else return a
+    end
 end
 
 concept ComparableOperators<T> where 
@@ -122,6 +134,8 @@ concept ComparableOperators<T> where
     BinaryGreater<T, T, bool>,
     BinaryGreaterEqual<T, T, bool>,
     Comparable<T>
+
+    'TODO: default implementations for operators
 end
 
 '===== numeric types =====
@@ -144,4 +158,14 @@ end
 concept Integral<T> where 
     Real<T>,
     BinaryModulo<T>
+end
+
+concept BitOperators<T> where
+    EqualityOperators<T>,
+    BinaryAnd<T, T, T>,
+    BinaryOr<T, T, T>,
+    BinaryXor<T, T, T>,
+    BinaryShiftRight<T, int, T>,
+    BinaryShiftLeft<T, int, T>,
+    UnaryNot<T, T>
 end
