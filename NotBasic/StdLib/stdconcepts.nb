@@ -93,8 +93,8 @@ concept UnaryNot<T, TR> where (T => TR)
     declare operator not(a:T):TR
 end
 
-concept UnaryCast<TFrom, TTo>
-    declare operator cast(a:TFrom):TTo
+concept Convertible<TFrom, TTo>
+    declare fun convert(a:TFrom):TTo
 end
 
 '===== comparable =====

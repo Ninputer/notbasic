@@ -56,7 +56,6 @@ Public Class NotBasicParser
     Private NotKeyword As Token
     Private XorKeyword As Token
     Private ModKeyword As Token
-    Private CastKeyword As Token
     Private ConceptKeyword As Token
     Private ConcreteKeyword As Token
     Private WhereKeyword As Token
@@ -311,7 +310,6 @@ Public Class NotBasicParser
             NotKeyword = .DefineToken(Literal("not"))
             XorKeyword = .DefineToken(Literal("xor"))
             ModKeyword = .DefineToken(Literal("mod"))
-            CastKeyword = .DefineToken(Literal("cast"))
             ConceptKeyword = .DefineToken(Literal("concept"))
             ConcreteKeyword = .DefineToken(Literal("concrete"))
             WhereKeyword = .DefineToken(Literal("where"))
@@ -414,7 +412,7 @@ Public Class NotBasicParser
     Private OrExpression As New Production(Of Expression)
     Private XorExpression As New Production(Of Expression)
     Private ShiftingExpression As New Production(Of Expression)
-    Private CastExpression As New Production(Of Expression)
+    Private TypeSpecifiedExpression As New Production(Of Expression)
     Private UnaryExpression As New Production(Of Expression)
     Private IntegerLiteralExpression As New Production(Of Expression)
     Private FloatLiteralExpression As New Production(Of Expression)
@@ -690,7 +688,7 @@ Public Class NotBasicParser
 
         OverloadableOperator.Rule =
             NotEqualOperator Or ShiftRightOperator Or
-            From op In Grammar.Union(MinusSymbol, PlusSymbol, NotKeyword, CastKeyword,
+            From op In Grammar.Union(MinusSymbol, PlusSymbol, NotKeyword,
                                      Asterisk, Slash, ModKeyword, ShiftLeft,
                                      GreaterSymbol, GreaterEqual, LessSymbol, LessEqual, EqualSymbol,
                                      AndKeyword, XorKeyword, OrKeyword)
@@ -1165,13 +1163,12 @@ Public Class NotBasicParser
             (From op In NotKeyword
             From exp In UnaryExpression
             Select New UnaryExpression(op.Value.Span, ExpressionOp.Not, exp).ToBase) Or
-            CastExpression
+            TypeSpecifiedExpression
 
-        CastExpression.Rule =
-            From op In CastKeyword
-            From typesp In TypeSpecifier.Optional
+        TypeSpecifiedExpression.Rule =
             From exp In UnaryExpression
-            Select New CastExpression(op.Value.Span, exp, typesp).ToBase
+            From typesp In TypeSpecifier
+            Select New TypeSpecifiedExpression(exp, typesp).ToBase
 
         'binary expressions
         FactorExpression.Rule = UnaryExpression

@@ -1,14 +1,12 @@
 ﻿Imports VBF.Compilers
 
-Public Class CastExpression
+Public Class TypeSpecifiedExpression
     Inherits Expression
 
-    Private m_keywordSpan As SourceSpan
     Private m_exp As Expression
     Private m_targetType As TypeSpecifier
 
-    Sub New(keywordSpan As SourceSpan, exp As Expression, targetType As TypeSpecifier)
-        m_keywordSpan = keywordSpan
+    Sub New(exp As Expression, targetType As TypeSpecifier)
         m_exp = exp
         m_targetType = targetType
     End Sub

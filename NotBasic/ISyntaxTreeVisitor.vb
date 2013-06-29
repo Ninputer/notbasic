@@ -7,7 +7,7 @@
     Function Visit(booleanLiteral As BooleanLiteralExpression) As T
     Function Visit(bracketExp As BracketExpression) As T
     Function Visit(callExp As CallExpression) As T
-    Function Visit(castExp As CastExpression) As T
+    Function Visit(castExp As TypeSpecifiedExpression) As T
     Function Visit(charLiteral As CharLiteral) As T
     Function Visit(cu As CompilationUnit) As T
     Function Visit(conceptConstraint As ConceptConstraintClause) As T
