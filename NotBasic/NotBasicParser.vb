@@ -471,6 +471,7 @@ Public Class NotBasicParser
         'DONE: object type
         'DONE: nothing literal
         'TODO: new object expression?
+        'TODO: void type
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())

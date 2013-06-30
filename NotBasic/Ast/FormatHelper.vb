@@ -79,6 +79,12 @@ Class FormatHelper
     Public Sub ObjectToString(obj As Object)
         If obj Is Nothing Then Return
 
+        Dim uid = TryCast(obj, UnifiedIdentifer)
+        If uid IsNot Nothing Then
+            Me.AddString(uid.Identifier)
+            Exit Sub
+        End If
+
         Dim nodeType = obj.GetType()
         Me.AddString(nodeType.Name)
         Me.BeginBlock()
