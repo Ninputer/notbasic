@@ -3,11 +3,10 @@
 Public Class IntegerLiteralExpression
     Inherits Expression
 
-    Private _literal As LexemeValue
+    Public Property Value As LexemeValue
 
     Sub New(literal As LexemeValue)
-        ' TODO: Complete member initialization 
-        _literal = literal
+        Value = literal
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

@@ -3,12 +3,11 @@
 Public Class FunctionTypeName
     Inherits TypeName
 
-    Private FunKeywordSpan As SourceSpan
-    Private ParameterTypes As IEnumerable(Of TypeName)
-    Private ReturnType As TypeName
+    Public Property FunKeywordSpan As SourceSpan
+    Public Property ParameterTypes As IEnumerable(Of TypeName)
+    Public Property ReturnType As TypeName
 
     Sub New(sourceSpan As SourceSpan, paramTypes As IEnumerable(Of TypeName), returnType As TypeName)
-        ' TODO: Complete member initialization 
         Me.FunKeywordSpan = sourceSpan
         Me.ParameterTypes = paramTypes
         Me.ReturnType = returnType

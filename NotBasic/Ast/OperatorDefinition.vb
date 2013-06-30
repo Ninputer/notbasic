@@ -2,15 +2,14 @@
 Public Class OperatorDefinition
     Inherits Definition
 
-    Private _decl As OperatorSignature
-    Private _statements As IEnumerable(Of Statement)
-    Private _sourceSpan As Compilers.SourceSpan
+    Public Property Signature As OperatorSignature
+    Public Property Statements As IEnumerable(Of Statement)
+    Public Property EndKeywordSpan As Compilers.SourceSpan
 
-    Sub New(decl As OperatorSignature, statements As IEnumerable(Of Statement), sourceSpan As Compilers.SourceSpan)
-        ' TODO: Complete member initialization 
-        _decl = decl
-        _statements = statements
-        _sourceSpan = sourceSpan
+    Sub New(signature As OperatorSignature, statements As IEnumerable(Of Statement), sourceSpan As Compilers.SourceSpan)
+        Me.Signature = signature
+        Me.Statements = statements
+        Me.EndKeywordSpan = sourceSpan
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

@@ -2,17 +2,16 @@
 Public Class IfThenStatement
     Inherits Statement
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _condition As Expression
-    Private _trueStatement As Statement
-    Private _elsePart As Statement
+    Public Property IfKeywordSpan As Compilers.SourceSpan
+    Public Property Condition As Expression
+    Public Property TruePart As Statement
+    Public Property ElsePart As Statement
 
-    Sub New(sourceSpan As Compilers.SourceSpan, condition As Expression, trueStatement As Statement, elsePart As Statement)
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _condition = condition
-        _trueStatement = trueStatement
-        _elsePart = elsePart
+    Sub New(ifSpan As Compilers.SourceSpan, condition As Expression, truePart As Statement, elsePart As Statement)
+        Me.IfKeywordSpan = ifSpan
+        Me.Condition = condition
+        Me.TruePart = truePart
+        Me.ElsePart = elsePart
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

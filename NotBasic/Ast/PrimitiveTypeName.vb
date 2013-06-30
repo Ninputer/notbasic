@@ -2,11 +2,10 @@
 Public Class PrimitiveTypeName
     Inherits TypeName
 
-    Private _lexemeValue As Compilers.Scanners.LexemeValue
+    Public Property TypeName As Compilers.Scanners.LexemeValue
 
-    Sub New(lexemeValue As Compilers.Scanners.LexemeValue)
-        ' TODO: Complete member initialization 
-        _lexemeValue = lexemeValue
+    Sub New(typeName As Compilers.Scanners.LexemeValue)
+        Me.TypeName = typeName
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

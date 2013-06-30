@@ -2,15 +2,14 @@
 Public Class MemberAccessExpression
     Inherits Expression
 
-    Private _exp As Expression
-    Private _memberName As UnifiedIdentifer
-    Private _typeArgs As IEnumerable(Of TypeName)
+    Public Property Target As Expression
+    Public Property MemberName As UnifiedIdentifer
+    Public Property TypeArguments As IEnumerable(Of TypeName)
 
     Sub New(exp As Expression, memberName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName))
-        ' TODO: Complete member initialization 
-        _exp = exp
-        _memberName = memberName
-        _typeArgs = typeArgs
+        Me.Target = exp
+        Me.MemberName = memberName
+        Me.TypeArguments = typeArgs
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

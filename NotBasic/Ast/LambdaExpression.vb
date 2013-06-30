@@ -1,13 +1,12 @@
 ﻿Public Class LambdaExpression
     Inherits Expression
 
-    Private _signature As LambdaSignature
-    Private _body As LambdaBody
+    Public Property Signature As LambdaSignature
+    Public Property Body As LambdaBody
 
     Sub New(signature As LambdaSignature, body As LambdaBody)
-        ' TODO: Complete member initialization 
-        _signature = signature
-        _body = body
+        Me.Signature = signature
+        Me.Body = body
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
