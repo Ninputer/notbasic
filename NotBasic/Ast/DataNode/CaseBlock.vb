@@ -2,20 +2,19 @@
 
 Public Class CaseBlock
     Inherits SyntaxTreeData
-    Private _sourceSpan As SourceSpan
-    Private _expList As IEnumerable(Of Expression)
-    Private _caseBody As IEnumerable(Of Statement)
+    Public Property CaseKeywordSpan As SourceSpan
+    Public Property ConditionExpressions As IEnumerable(Of Expression)
+    Public Property CaseBody As IEnumerable(Of Statement)
 
     Sub New(sourceSpan As SourceSpan, expList As IEnumerable(Of Expression), caseBody As IEnumerable(Of Statement))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _expList = expList
-        _caseBody = caseBody
+        Me.CaseKeywordSpan = sourceSpan
+        Me.ConditionExpressions = expList
+        Me.CaseBody = caseBody
     End Sub
 
     Public ReadOnly Property CaseSpan As SourceSpan
         Get
-            Return _sourceSpan
+            Return CaseKeywordSpan
         End Get
     End Property
 End Class

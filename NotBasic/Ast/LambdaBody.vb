@@ -9,11 +9,10 @@ End Class
 Public Class ExpressionLambdaBody
     Inherits LambdaBody
 
-    Private _exp As Expression
+    Public Property Expression As Expression
 
     Sub New(exp As Expression)
-        ' TODO: Complete member initialization 
-        _exp = exp
+        Me.Expression = exp
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T
@@ -24,11 +23,10 @@ End Class
 Public Class BlockLambdaBody
     Inherits LambdaBody
 
-    Private _block As IEnumerable(Of Statement)
+    Public Property BlockStatements As IEnumerable(Of Statement)
 
     Sub New(block As IEnumerable(Of Statement))
-        ' TODO: Complete member initialization 
-        _block = block
+        Me.BlockStatements = block
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

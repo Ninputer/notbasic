@@ -8,7 +8,6 @@ Module ProgramEntry
         Dim em As New CompilationErrorManager
         Dim parser As New NotBasicParser(em)
 
-
         Dim code = <![CDATA[
 fun Foo(a, b)
     return Test() 

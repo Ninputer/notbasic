@@ -1,11 +1,10 @@
 ﻿
 Public Class TypeSpecifier
     Inherits SyntaxTreeData
-    Private _spTypeName As TypeName
+    Public Property Type As TypeName
 
     Sub New(spTypeName As TypeName)
-        ' TODO: Complete member initialization 
-        _spTypeName = spTypeName
+        Me.Type = spTypeName
     End Sub
 
 End Class

@@ -2,14 +2,14 @@
 Public Class BinaryExpression
     Inherits Expression
 
-    Private m_op As ExpressionOp
-    Private m_left As Expression
-    Private m_right As Expression
+    Public Property Op As ExpressionOp
+    Public Property Left As Expression
+    Public Property Right As Expression
 
     Sub New(op As ExpressionOp, left As Expression, right As Expression)
-        m_op = op
-        m_left = left
-        m_right = right
+        Me.Op = op
+        Me.Left = left
+        Me.Right = right
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

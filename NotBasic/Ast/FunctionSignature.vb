@@ -3,22 +3,21 @@
 Public Class FunctionSignature
     Inherits ProcedureSignature
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _name As UnifiedIdentifer
-    Private _paramlist As IEnumerable(Of ParameterDeclaration)
-    Private _returnTypeSp As TypeSpecifier
-    Private _typeParams As IEnumerable(Of TypeParameter)
-    Private _whereClauses As IEnumerable(Of ConstraintClause)
+    Public Property FunKeywordSpan As Compilers.SourceSpan
+    Public Property Name As UnifiedIdentifer
+    Public Property Parameters As IEnumerable(Of ParameterDeclaration)
+    Public Property ReturnTypeSpecifier As TypeSpecifier
+    Public Property TypeParameters As IEnumerable(Of TypeParameter)
+    Public Property ConstraintClauses As IEnumerable(Of ConstraintClause)
 
-  
+
     Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier, typeParams As IEnumerable(Of TypeParameter), whereClauses As IEnumerable(Of ConstraintClause))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _name = name
-        _paramlist = paramlist
-        _returnTypeSp = returnTypeSp
-        _typeParams = typeParams
-        _whereClauses = whereClauses
+        Me.FunKeywordSpan = sourceSpan
+        Me.Name = name
+        Me.Parameters = paramlist
+        Me.ReturnTypeSpecifier = returnTypeSp
+        Me.TypeParameters = typeParams
+        Me.ConstraintClauses = whereClauses
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

@@ -2,20 +2,19 @@
 
 Public Class CaseElseBlock
     Inherits SyntaxTreeData
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _sourceSpan1 As Compilers.SourceSpan
-    Private _caseBody As IEnumerable(Of Statement)
+    Public Property CaseKeywordSpan As Compilers.SourceSpan
+    Public Property ElseKeywordSpan As Compilers.SourceSpan
+    Public Property CaseBody As IEnumerable(Of Statement)
 
     Sub New(sourceSpan As Compilers.SourceSpan, sourceSpan1 As Compilers.SourceSpan, caseBody As IEnumerable(Of Statement))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _sourceSpan1 = sourceSpan1
-        _caseBody = caseBody
+        Me.CaseKeywordSpan = sourceSpan
+        Me.ElseKeywordSpan = sourceSpan1
+        Me.CaseBody = caseBody
     End Sub
 
     Public ReadOnly Property CaseSpan As SourceSpan
         Get
-            Return _sourceSpan
+            Return CaseKeywordSpan
         End Get
     End Property
 

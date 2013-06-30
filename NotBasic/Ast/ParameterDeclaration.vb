@@ -1,26 +1,14 @@
 ﻿
 Public Class ParameterDeclaration
     Inherits SyntaxTreeNode
-    Private _did As UnifiedIdentifer
-    Private _typesp As TypeSpecifier
-    Private _parameterPrefix As ParameterPrefix
-
-    Sub New(did As UnifiedIdentifer)
-        ' TODO: Complete member initialization 
-        _did = did
-    End Sub
-
-    Sub New(did As UnifiedIdentifer, typesp As TypeSpecifier)
-        ' TODO: Complete member initialization 
-        _did = did
-        _typesp = typesp
-    End Sub
+    Public Property Name As UnifiedIdentifer
+    Public Property TypeSpecifier As TypeSpecifier
+    Public Property ParameterPrefix As ParameterPrefix
 
     Sub New(did As UnifiedIdentifer, typesp As TypeSpecifier, parameterPrefix As ParameterPrefix)
-        ' TODO: Complete member initialization 
-        _did = did
-        _typesp = typesp
-        _parameterPrefix = parameterPrefix
+        Me.Name = did
+        Me.TypeSpecifier = typesp
+        Me.ParameterPrefix = parameterPrefix
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

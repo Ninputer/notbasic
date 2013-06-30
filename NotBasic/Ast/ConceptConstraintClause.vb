@@ -2,13 +2,12 @@
 Public Class ConceptConstraintClause
     Inherits ConstraintClause
 
-    Private m_conceptName As UnifiedIdentifer
-    Private m_typeArgs As IEnumerable(Of TypeName)
+    Public Property ConceptName As UnifiedIdentifer
+    Public Property TypeArguments As IEnumerable(Of TypeName)
 
     Sub New(conceptName As UnifiedIdentifer, typeArgs As IEnumerable(Of TypeName))
-        ' TODO: Complete member initialization 
-        m_conceptName = conceptName
-        m_typeArgs = typeArgs
+        Me.ConceptName = conceptName
+        Me.TypeArguments = typeArgs
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

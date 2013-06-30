@@ -652,7 +652,7 @@ Public Class NotBasicParser
         LambdaParameterDeclaration.Rule =
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
-            Select New ParameterDeclaration(did, typesp)
+            Select New ParameterDeclaration(did, typesp, Nothing)
 
         TypeSpecifier.Rule =
             From _colon In Colon
@@ -662,7 +662,7 @@ Public Class NotBasicParser
 
         'FunctionDeclaration := fun name ( arglist ) <st>
         FunctionSignature.Rule =
-            From keyword In FunctionKeyword
+            From _fun In FunctionKeyword
             From name In DeclaringIdentifier
             From typeParams In TypeParameters.Optional
             From _lpth In LeftPth
@@ -673,7 +673,7 @@ Public Class NotBasicParser
             From returnTypeSp In TypeSpecifier.Optional()
             From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New FunctionSignature(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
+            Select New FunctionSignature(_fun.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
 
         FunctionDefinition.Rule =
             From decl In FunctionSignature
