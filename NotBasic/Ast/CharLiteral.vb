@@ -3,10 +3,10 @@
 Public Class CharLiteral
     Inherits Expression
 
-    Private m_value As LexemeValue
+    Public Property Value As LexemeValue
 
     Sub New(value As LexemeValue)
-        m_value = value
+        Me.Value = value
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

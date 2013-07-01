@@ -2,24 +2,23 @@
 Public Class TypeDefinition
     Inherits Definition
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _typeName As UnifiedIdentifer
-    Private _typeParams As IEnumerable(Of TypeParameter)
-    Private _whereClauses As IEnumerable(Of ConstraintClause)
-    Private _fields As IEnumerable(Of FieldDefinition)
-    Private _sourceSpan1 As Compilers.SourceSpan
-    Private _baseType As TypeSpecifier
+    Public Property TypeKeywordSpan As Compilers.SourceSpan
+    Public Property Name As UnifiedIdentifer
+    Public Property TypeParameters As IEnumerable(Of TypeParameter)
+    Public Property ConstraintClauses As IEnumerable(Of ConstraintClause)
+    Public Property Fields As IEnumerable(Of FieldDefinition)
+    Public Property EndKeywordSpan As Compilers.SourceSpan
+    Public Property BaseTypeSpecifier As TypeSpecifier
 
 
-    Sub New(sourceSpan As Compilers.SourceSpan, sourceSpan1 As Compilers.SourceSpan, typeName As UnifiedIdentifer, typeParams As IEnumerable(Of TypeParameter), baseType As TypeSpecifier, whereClauses As IEnumerable(Of ConstraintClause), fields As IEnumerable(Of FieldDefinition))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _sourceSpan1 = sourceSpan1
-        _typeName = typeName
-        _typeParams = typeParams
-        _baseType = baseType
-        _whereClauses = whereClauses
-        _fields = fields
+    Sub New(typeSpan As Compilers.SourceSpan, endSpan As Compilers.SourceSpan, typeName As UnifiedIdentifer, typeParams As IEnumerable(Of TypeParameter), baseType As TypeSpecifier, whereClauses As IEnumerable(Of ConstraintClause), fields As IEnumerable(Of FieldDefinition))
+        Me.TypeKeywordSpan = typeSpan
+        Me.EndKeywordSpan = endSpan
+        Me.Name = typeName
+        Me.TypeParameters = typeParams
+        Me.BaseTypeSpecifier = baseType
+        Me.ConstraintClauses = whereClauses
+        Me.Fields = fields
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

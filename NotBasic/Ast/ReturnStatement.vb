@@ -2,13 +2,12 @@
 Public Class ReturnStatement
     Inherits Statement
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _returnValue As Expression
+    Public Property ReturnKeywordSpan As Compilers.SourceSpan
+    Public Property ReturnValue As Expression
 
-    Sub New(sourceSpan As Compilers.SourceSpan, returnValue As Expression)
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _returnValue = returnValue
+    Sub New(returnSpan As Compilers.SourceSpan, returnValue As Expression)
+        Me.ReturnKeywordSpan = returnSpan
+        Me.ReturnValue = returnValue
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

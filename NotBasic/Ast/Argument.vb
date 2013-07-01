@@ -1,10 +1,10 @@
 ﻿
 Public Class Argument
     Inherits SyntaxTreeNode
-    Private m_argexp As Expression
+    Public Property ArgumentExpression As Expression
 
     Sub New(argexp As Expression)
-        m_argexp = argexp
+        Me.ArgumentExpression = argexp
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

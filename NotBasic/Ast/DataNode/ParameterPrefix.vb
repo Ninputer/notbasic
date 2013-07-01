@@ -2,11 +2,10 @@
 
 Public Class ParameterPrefix
     Inherits SyntaxTreeData
-    Private _lexemeValue As LexemeValue
+    Public Property Prefix As LexemeValue
 
-    Sub New(lexemeValue As LexemeValue)
-        ' TODO: Complete member initialization 
-        _lexemeValue = lexemeValue
+    Sub New(prefix As LexemeValue)
+        prefix = prefix
     End Sub
 
 End Class

@@ -2,24 +2,20 @@
 Public Class IfBlockStatement
     Inherits Statement
 
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _sourceSpan1 As Compilers.SourceSpan
-    Private _condition As Expression
-    Private _truePart As IEnumerable(Of Statement)
-    Private _elseIfBlocks As IEnumerable(Of ElseIfBlock)
-    Private _elseBlockOpt As ElseBlock
+    Public Property IfKeywordSpan As Compilers.SourceSpan
+    Public Property EndKeywordSpan As Compilers.SourceSpan
+    Public Property Condition As Expression
+    Public Property TruePart As IEnumerable(Of Statement)
+    Public Property ElseIfBlocks As IEnumerable(Of ElseIfBlock)
+    Public Property ElseBlock As ElseBlock
 
-    Sub New(sourceSpan As Compilers.SourceSpan, sourceSpan1 As Compilers.SourceSpan, condition As Expression, truePart As IEnumerable(Of Statement), elseIfBlocks As IEnumerable(Of ElseIfBlock), elseBlockOpt As ElseBlock)
-        If truePart Is Nothing Then Exit Sub
-        If elseIfBlocks Is Nothing Then Exit Sub
-
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _sourceSpan1 = sourceSpan1
-        _condition = condition
-        _truePart = truePart
-        _elseIfBlocks = elseIfBlocks
-        _elseBlockOpt = elseBlockOpt
+    Sub New(ifSpan As Compilers.SourceSpan, endSpan As Compilers.SourceSpan, condition As Expression, truePart As IEnumerable(Of Statement), elseIfBlocks As IEnumerable(Of ElseIfBlock), elseBlockOpt As ElseBlock)
+        Me.IfKeywordSpan = ifSpan
+        Me.EndKeywordSpan = endSpan
+        Me.Condition = condition
+        Me.TruePart = truePart
+        Me.ElseIfBlocks = elseIfBlocks
+        Me.ElseBlock = elseBlockOpt
     End Sub
 
     Public Overrides Function Accept(Of T)(visitor As ISyntaxTreeVisitor(Of T)) As T

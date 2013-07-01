@@ -85,7 +85,7 @@
     <Compile Include="Ast\DoLoopStatement.vb" />
     <Compile Include="Ast\DataNode\ElseBlock.vb" />
     <Compile Include="Ast\DataNode\ElseIfBlock.vb" />
-    <Compile Include="Ast\CastExpression.vb" />
+    <Compile Include="Ast\TypeSpecifiedExpression.vb" />
     <Compile Include="Ast\ConceptDeclaration.vb" />
     <Compile Include="Ast\ConceptConstraintClause.vb" />
     <Compile Include="Ast\ConcreteDeclaration.vb" />

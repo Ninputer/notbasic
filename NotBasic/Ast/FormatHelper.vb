@@ -79,14 +79,20 @@ Class FormatHelper
     Public Sub ObjectToString(obj As Object)
         If obj Is Nothing Then Return
 
+        Dim uid = TryCast(obj, UnifiedIdentifer)
+        If uid IsNot Nothing Then
+            Me.AddString(uid.Identifier)
+            Exit Sub
+        End If
+
         Dim nodeType = obj.GetType()
         Me.AddString(nodeType.Name)
         Me.BeginBlock()
 
-        Dim fields = nodeType.GetFields(BindingFlags.NonPublic Or BindingFlags.Instance)
+        Dim props = nodeType.GetProperties()
 
-        For Each field In fields
-            If field.FieldType.Equals(GetType(UnifiedIdentifer)) Then
+        For Each field In props
+            If field.PropertyType.Equals(GetType(UnifiedIdentifer)) Then
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendString(":")
                 Dim id = DirectCast(field.GetValue(obj), UnifiedIdentifer)
@@ -95,21 +101,21 @@ Class FormatHelper
                 Else
                     Me.AppendLineString(Nothing)
                 End If
-            ElseIf GetType(SyntaxTreeNode).IsAssignableFrom(field.FieldType) OrElse
-                GetType(SyntaxTreeData).IsAssignableFrom(field.FieldType) Then
+            ElseIf GetType(SyntaxTreeNode).IsAssignableFrom(field.PropertyType) OrElse
+                GetType(SyntaxTreeData).IsAssignableFrom(field.PropertyType) Then
                 'field is syntax node
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendLineString(":")
 
                 ObjectToString(field.GetValue(obj))
-            ElseIf GetType(IEnumerable(Of SyntaxTreeNode)).IsAssignableFrom(field.FieldType) OrElse
-                GetType(IEnumerable(Of SyntaxTreeData)).IsAssignableFrom(field.FieldType) Then
+            ElseIf GetType(IEnumerable(Of SyntaxTreeNode)).IsAssignableFrom(field.PropertyType) OrElse
+                GetType(IEnumerable(Of SyntaxTreeData)).IsAssignableFrom(field.PropertyType) Then
                 'field is syntax node list
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendLineString(":")
 
                 EnumerableToString(TryCast(field.GetValue(obj), IEnumerable))
-            ElseIf field.FieldType.Equals(GetType(LexemeValue)) Then
+            ElseIf field.PropertyType.Equals(GetType(LexemeValue)) Then
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendString(":")
                 Dim z = DirectCast(field.GetValue(obj), LexemeValue)
@@ -118,7 +124,7 @@ Class FormatHelper
                 Else
                     Me.AppendLineString(Nothing)
                 End If
-            ElseIf field.FieldType.Equals(GetType(ExpressionOp)) Then
+            ElseIf field.PropertyType.Equals(GetType(ExpressionOp)) Then
                 Me.AddStringNoReturn(field.Name)
                 Me.AppendString(":")
                 Dim op = DirectCast(field.GetValue(obj), ExpressionOp)

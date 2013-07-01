@@ -1,13 +1,12 @@
 ﻿
 Public Class ElseBlock
     Inherits SyntaxTreeData
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _elsePart As IEnumerable(Of Statement)
+    Public Property ElseKeywordSpan As Compilers.SourceSpan
+    Public Property ElsePart As IEnumerable(Of Statement)
 
     Sub New(sourceSpan As Compilers.SourceSpan, elsePart As IEnumerable(Of Statement))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _elsePart = elsePart
+        Me.ElseKeywordSpan = sourceSpan
+        Me.ElsePart = elsePart
     End Sub
 
 End Class

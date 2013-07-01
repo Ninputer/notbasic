@@ -8,7 +8,6 @@ Module ProgramEntry
         Dim em As New CompilationErrorManager
         Dim parser As New NotBasicParser(em)
 
-
         Dim code = <![CDATA[
 fun Foo(a, b)
     return Test() 
@@ -20,8 +19,8 @@ fun Bar(f:fun(int)int, g:fun())
 end
 
 operator+(a:int, b:int):List<int>
-    a = cast:int b
-    a = cast:Point<int> b
+    a = convert(b):int
+    a = convert(b):Point<int>
     return a
 end
 

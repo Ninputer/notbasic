@@ -106,8 +106,8 @@ concept UnaryNot<T, TR> where (T => TR)
     decl operator not(a:T):TR
 end
 
-concept UnaryCast<TFrom, TTo>
-    decl operator cast(a:TFrom):TTo
+concept Convertible<TFrom, TTo>
+    decl fun convert(a:TFrom):TTo
 end
 
 '===== comparable =====

@@ -1,17 +1,16 @@
 ﻿
 Public Class CatchBlock
     Inherits SyntaxTreeData
-    Private _sourceSpan As Compilers.SourceSpan
-    Private _exceptVar As UnifiedIdentifer
-    Private _exceptType As TypeSpecifier
-    Private _catchBody As IEnumerable(Of Statement)
+    Public Property CatchKeywordSpan As Compilers.SourceSpan
+    Public Property ExceptionVariable As UnifiedIdentifer
+    Public Property ExceptionType As TypeSpecifier
+    Public Property CatchBody As IEnumerable(Of Statement)
 
     Sub New(sourceSpan As Compilers.SourceSpan, exceptVar As UnifiedIdentifer, exceptType As TypeSpecifier, catchBody As IEnumerable(Of Statement))
-        ' TODO: Complete member initialization 
-        _sourceSpan = sourceSpan
-        _exceptVar = exceptVar
-        _exceptType = exceptType
-        _catchBody = catchBody
+        Me.CatchKeywordSpan = sourceSpan
+        Me.ExceptionVariable = exceptVar
+        Me.ExceptionType = exceptType
+        Me.CatchBody = catchBody
     End Sub
 
 End Class

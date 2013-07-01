@@ -56,7 +56,6 @@ Public Class NotBasicParser
     Private NotKeyword As Token
     Private XorKeyword As Token
     Private ModKeyword As Token
-    Private CastKeyword As Token
     Private ConceptKeyword As Token
     Private ConcreteKeyword As Token
     Private WhereKeyword As Token
@@ -311,7 +310,6 @@ Public Class NotBasicParser
             NotKeyword = .DefineToken(Literal("not"))
             XorKeyword = .DefineToken(Literal("xor"))
             ModKeyword = .DefineToken(Literal("mod"))
-            CastKeyword = .DefineToken(Literal("cast"))
             ConceptKeyword = .DefineToken(Literal("concept"))
             ConcreteKeyword = .DefineToken(Literal("concrete"))
             WhereKeyword = .DefineToken(Literal("where"))
@@ -414,7 +412,7 @@ Public Class NotBasicParser
     Private OrExpression As New Production(Of Expression)
     Private XorExpression As New Production(Of Expression)
     Private ShiftingExpression As New Production(Of Expression)
-    Private CastExpression As New Production(Of Expression)
+    Private TypeSpecifiedExpression As New Production(Of Expression)
     Private UnaryExpression As New Production(Of Expression)
     Private IntegerLiteralExpression As New Production(Of Expression)
     Private FloatLiteralExpression As New Production(Of Expression)
@@ -473,6 +471,7 @@ Public Class NotBasicParser
         'DONE: object type
         'DONE: nothing literal
         'TODO: new object expression?
+        'TODO: void type
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
@@ -655,7 +654,7 @@ Public Class NotBasicParser
         LambdaParameterDeclaration.Rule =
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
-            Select New ParameterDeclaration(did, typesp)
+            Select New ParameterDeclaration(did, typesp, Nothing)
 
         TypeSpecifier.Rule =
             From _colon In Colon
@@ -665,7 +664,7 @@ Public Class NotBasicParser
 
         'FunctionDeclaration := fun name ( arglist ) <st>
         FunctionSignature.Rule =
-            From keyword In FunctionKeyword
+            From _fun In FunctionKeyword
             From name In DeclaringIdentifier
             From typeParams In TypeParameters.Optional
             From _lpth In LeftPth
@@ -676,7 +675,7 @@ Public Class NotBasicParser
             From returnTypeSp In TypeSpecifier.Optional()
             From whereClauses In ConstraintClauses.Optional()
             From _st In ST
-            Select New FunctionSignature(keyword.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
+            Select New FunctionSignature(_fun.Value.Span, name, paramlist, returnTypeSp, typeParams, whereClauses)
 
         FunctionDefinition.Rule =
             From decl In FunctionSignature
@@ -691,7 +690,7 @@ Public Class NotBasicParser
 
         OverloadableOperator.Rule =
             NotEqualOperator Or ShiftRightOperator Or
-            From op In Grammar.Union(MinusSymbol, PlusSymbol, NotKeyword, CastKeyword,
+            From op In Grammar.Union(MinusSymbol, PlusSymbol, NotKeyword,
                                      Asterisk, Slash, ModKeyword, ShiftLeft,
                                      GreaterSymbol, GreaterEqual, LessSymbol, LessEqual, EqualSymbol,
                                      AndKeyword, XorKeyword, OrKeyword)
@@ -1166,13 +1165,12 @@ Public Class NotBasicParser
             (From op In NotKeyword
             From exp In UnaryExpression
             Select New UnaryExpression(op.Value.Span, ExpressionOp.Not, exp).ToBase) Or
-            CastExpression
+            TypeSpecifiedExpression
 
-        CastExpression.Rule =
-            From op In CastKeyword
-            From typesp In TypeSpecifier.Optional
+        TypeSpecifiedExpression.Rule =
             From exp In UnaryExpression
-            Select New CastExpression(op.Value.Span, exp, typesp).ToBase
+            From typesp In TypeSpecifier
+            Select New TypeSpecifiedExpression(exp, typesp).ToBase
 
         'binary expressions
         FactorExpression.Rule = UnaryExpression
