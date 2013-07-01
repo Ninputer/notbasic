@@ -320,7 +320,7 @@ Public Class NotBasicParser
             StepKeyword = .DefineToken(Literal("step"))
             InKeyword = .DefineToken(Literal("in"))
             EnumKeyword = .DefineToken(Literal("enum"))
-            DeclareKeyword = .DefineToken(Literal("declare"))
+            DeclareKeyword = .DefineToken(Literal("decl"))
         End With
 
         'define contextual keywords for property declaration
@@ -583,7 +583,8 @@ Public Class NotBasicParser
             ConceptDefinition.Select(Function(d) d.ToBase()) Or
             ConcreteDefinition.Select(Function(d) d.ToBase()) Or
             TypeDefinition.Select(Function(d) d.ToBase()) Or
-            EnumDefinition.Select(Function(d) d.ToBase())
+            EnumDefinition.Select(Function(d) d.ToBase()) Or
+            ProcedureDeclaration.Select(Function(d) d.ToBase())
 
         Program.Rule =
             From _emptylines In StatementTerminator.Many
@@ -779,9 +780,9 @@ Public Class NotBasicParser
             OperatorSignature.Select(Function(s) s.ToBase)
 
         ProcedureDeclaration.Rule =
-            From _declare In DeclareKeyword
+            From _decl In DeclareKeyword
             From signature In ProcedureSignature
-            Select New ProcedureDeclaration(_declare.Value.Span, signature)
+            Select New ProcedureDeclaration(_decl.Value.Span, signature)
 
         ProcedureDefinition.Rule =
             FunctionDefinition.Select(Function(d) d.ToBase()) Or

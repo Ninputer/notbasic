@@ -166,21 +166,21 @@ fun ArrayLiteral()
 end
 
 concept Functor<F<>>
-    declare fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
+    decl fun fmap<T, U>(f:fun(T)U):fun(F<T>)F<U>
 end
 
 concept Monad<M<>> where Functor<M>
-    declare fun unit<U>(a:U):M<U>
-    declare fun bind<T, U>(m:M<T>, f:fun(T)M<U>):M<U>
+    decl fun unit<U>(a:U):M<U>
+    decl fun bind<T, U>(m:M<T>, f:fun(T)M<U>):M<U>
 end
 
 concept Comparable<T>
-    declare fun Compare(a:T, b:T):int
-    declare operator<(a:T, b:T):bool
+    decl fun Compare(a:T, b:T):int
+    decl operator<(a:T, b:T):bool
 end
 
 concept EqualityComparable<T>
-    declare fun Equals(a:T, b:T):bool
+    decl fun Equals(a:T, b:T):bool
     operator=(a:T, b:T):bool
         return Equals(a,b)
     end
@@ -191,7 +191,7 @@ concept EqualityComparable<T>
 end
 
 concept Addable<TA,TB,TR> where (TA,TB => TR)
-    declare operator+(a:TA, b:TB):TR
+    decl operator+(a:TA, b:TB):TR
 end
 
 concrete Comparable<int>

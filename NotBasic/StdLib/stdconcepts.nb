@@ -3,103 +3,116 @@
 'this file defines the concepts required by the language runtime
 
 '=====required by 'for each' statement=====
+type IEnumerable<T>
 
-concept Enumerable<T, TElement, TEnumerator> where Enumerator<TEnumerator, TElement>
-    declare fun GetEnumerator(obj:T): TEnumerator
 end
 
-concept Enumerator<T, TElement>
-    declare fun Current(e:T):TElement
-    declare fun MoveNext(e:T)
+type IEnumerator
+
 end
+
+decl fun GetEnumerator(select me:IEnumerable<T>):IEnumerator<T>
+
+'concept Enumerable<T, TElement, TEnumerator> where Enumerator<TEnumerator, TElement>
+'    decl fun GetEnumerator(select obj:T): TEnumerator
+'end
+
+'concept Enumerator<T, TElement>
+'    decl fun Current(select e:T):TElement
+'    decl fun MoveNext(select e:T)
+'end
+
+'func Where<T, TE>(enumerable:T, fun(TE)bool predicate): T where Enumerable<T, TE>
+'    
+'end
 
 '=====overloadable operators=====
 
 'binary
 concept BinaryAdd<TA, TB, TR> where (TA, TB => TR)
-    declare operator+(a:TA, b:TB):TR
+    decl operator+(a:TA, b:TB):TR
 end
 
 concept BinarySubstract<TA, TB, TR> where (TA, TB => TR)
-    declare operator-(a:TA, b:TB):TR
+    decl operator-(a:TA, b:TB):TR
 end
 
 concept BinaryMultiply<TA, TB, TR> where (TA, TB => TR)
-    declare operator*(a:TA, b:TB):TR
+    decl operator*(a:TA, b:TB):TR
 end
 
 concept BinaryDivide<TA, TB, TR> where (TA, TB => TR)
-    declare operator/(a:TA, b:TB):TR
+    decl operator/(a:TA, b:TB):TR
 end
 
 concept BinaryModulo<TA, TB, TR> where (TA, TB => TR)
-    declare operator mod(a:TA, b:TB):TR
+    decl operator mod(a:TA, b:TB):TR
 end
 
 concept BinaryShiftLeft<TA, TB, TR> where (TA, TB => TR)
-    declare operator<<(a:TA, b:TB):TR
+    decl operator<<(a:TA, b:TB):TR
 end
 
 concept BinaryShiftRight<TA, TB, TR> where (TA, TB => TR)
-    declare operator>>(a:TA, b:TB):TR
+    decl operator>>(a:TA, b:TB):TR
 end
 
 concept BinaryEqual<TA, TB, TR> where (TA, TB => TR)
-    declare operator=(a:TA, b:TB):TR
+    decl operator=(a:TA, b:TB):TR
 end
 
 concept BinaryNotEqual<TA, TB, TR> where (TA, TB => TR)
-    declare operator<>(a:TA, b:TB):TR
+    decl operator<>(a:TA, b:TB):TR
 end
 
 concept BinaryLess<TA, TB, TR> where (TA, TB => TR)
-    declare operator<(a:TA, b:TB):TR
+    decl operator<(a:TA, b:TB):TR
 end
 
 concept BinaryLessEqual<TA, TB, TR> where (TA, TB => TR)
-    declare operator<=(a:TA, b:TB):TR
+    decl operator<=(a:TA, b:TB):TR
 end
 
 concept BinaryGreater<TA, TB, TR> where (TA, TB => TR)
-    declare operator>(a:TA, b:TB):TR
+    decl operator>(a:TA, b:TB):TR
 end
 
 concept BinaryGreaterEqual<TA, TB, TR> where (TA, TB => TR)
-    declare operator>=(a:TA, b:TB):TR
+    decl operator>=(a:TA, b:TB):TR
 end
 
 concept BinaryAnd<TA, TB, TR> where (TA, TB => TR)
-    declare operator and(a:TA, b:TB):TR
+    decl operator and(a:TA, b:TB):TR
 end
 
 concept BinaryOr<TA, TB, TR> where (TA, TB => TR)
-    declare operator or(a:TA, b:TB):TR
+    decl operator or(a:TA, b:TB):TR
 end
 
 concept BinaryXor<TA, TB, TR> where (TA, TB => TR)
-    declare operator xor(a:TA, b:TB):TR
+    decl operator xor(a:TA, b:TB):TR
 end
 
 'unary
 concept UnaryPlus<T, TR> where (T => TR)
-    declare operator+(a:T):TR
+    decl operator+(a:T):TR
 end
 
 concept UnaryMinus<T, TR> where (T => TR)
-    declare operator-(a:T):TR
+    decl operator-(a:T):TR
 end
 
 concept UnaryNot<T, TR> where (T => TR)
-    declare operator not(a:T):TR
+    decl operator not(a:T):TR
 end
 
 concept UnaryCast<TFrom, TTo>
-    declare operator cast(a:TFrom):TTo
+    decl operator cast(a:TFrom):TTo
 end
 
 '===== comparable =====
 concept Equality<T>
-    declare fun Equals(a:T, b:T):bool
+    decl fun Equals(a:T, b:T):bool
 end
 
 concept EqualityOperators<T> where 
@@ -117,7 +130,7 @@ concept EqualityOperators<T> where
 end
 
 concept Comparable<T> where Equality<T>
-    declare fun Compare(a:T, b:T):int
+    decl fun Compare(a:T, b:T):int
     fun Min(a:T, b:T):T
         if Compare(a, b) < 0 then return a else return b
     end
@@ -146,8 +159,8 @@ concept Number<T> where
     UnaryMinus<T, T>,
     UnaryPlus<T, T>
                             
-    declare fun Abs(x:T):T
-    declare fun Sign(x:T):T
+    decl fun Abs(x:T):T
+    decl fun Sign(x:T):T
 end
 
 concept Real<T> where
