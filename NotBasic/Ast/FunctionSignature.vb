@@ -10,7 +10,6 @@ Public Class FunctionSignature
     Public Property TypeParameters As IEnumerable(Of TypeParameter)
     Public Property ConstraintClauses As IEnumerable(Of ConstraintClause)
 
-
     Sub New(sourceSpan As SourceSpan, name As UnifiedIdentifer, paramlist As IEnumerable(Of ParameterDeclaration), returnTypeSp As TypeSpecifier, typeParams As IEnumerable(Of TypeParameter), whereClauses As IEnumerable(Of ConstraintClause))
         Me.FunKeywordSpan = sourceSpan
         Me.Name = name

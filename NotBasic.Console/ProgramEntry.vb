@@ -18,6 +18,10 @@ fun Bar(f:fun(int)int, g:fun())
     return g()
 end
 
+fun Sub(s:fun()#):#
+    s()
+end
+
 operator+(a:int, b:int):List<int>
     a = convert(b):int
     a = convert(b):Point<int>

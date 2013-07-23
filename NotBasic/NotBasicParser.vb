@@ -64,6 +64,7 @@ Public Class NotBasicParser
     Private StepKeyword As Token
     Private InKeyword As Token
     Private EnumKeyword As Token
+    Private MeKeyword As Token
 
     'contextural keywords
     Private GetKeyword As Token
@@ -102,6 +103,7 @@ Public Class NotBasicParser
     Private ShiftLeft As Token '<<
     Private Dot As Token '.
     Private Arrow As Token '=>
+    Private PoundSymbol As Token
 
     Private LineTerminator As Token
 
@@ -256,7 +258,7 @@ Public Class NotBasicParser
             ShiftLeft = .DefineToken(Literal("<<"))
             Dot = .DefineToken(Symbol("."c))
             Arrow = .DefineToken(Literal("=>"))
-
+            PoundSymbol = .DefineToken(Symbol("#"c))
             LineTerminator = .DefineToken(lineTerminatorChar Or Literal(vbCrLf), "line terminator")
         End With
 
@@ -319,6 +321,7 @@ Public Class NotBasicParser
             InKeyword = .DefineToken(Literal("in"))
             EnumKeyword = .DefineToken(Literal("enum"))
             DeclareKeyword = .DefineToken(Literal("decl"))
+            MeKeyword = .DefineToken(Literal("me"))
         End With
 
         'define contextual keywords for property declaration
@@ -354,7 +357,9 @@ Public Class NotBasicParser
     Private EnumDefinition As New Production(Of EnumDefinition)
 
     Private ParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
+    Private MethodParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
     Private ParameterDeclaration As New Production(Of ParameterDeclaration)
+    Private ExtensionMethodParameterDeclaration As New Production(Of ParameterDeclaration)
     Private FunctionSignature As New Production(Of FunctionSignature)
     Private FunctionDefinition As New Production(Of FunctionDefinition)
     Private LambdaParameterList As New Production(Of IEnumerable(Of ParameterDeclaration))
@@ -557,7 +562,8 @@ Public Class NotBasicParser
                                               LongKeyword,
                                               CharKeyword,
                                               StringKeyword,
-                                              ObjectKeyword)
+                                              ObjectKeyword,
+                                              PoundSymbol)
             Select DirectCast(New PrimitiveTypeName(typeKeyword.Value), TypeName)
 
         'fun(paramType)returnType
@@ -638,6 +644,16 @@ Public Class NotBasicParser
         ParameterList.Rule =
            ParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
 
+        MethodParameterList.Rule =
+            ParameterList Or
+            From extparam In ExtensionMethodParameterDeclaration
+            From restParams In (
+                From _1 In Comma.AsTerminal
+                From _lc In LineContinuation
+                From params In ParameterDeclaration.Many1(Comma.AsTerminal().SuffixedBy(LineContinuation))
+                Select params).Optional()
+            Select {extparam}.Concat(If(restParams, {}))
+
         Dim ParamPrefix =
             From prefix In Grammar.Union(SelectKeyword, CaseKeyword)
             Select prefix.Value
@@ -646,7 +662,13 @@ Public Class NotBasicParser
             From prefix In ParamPrefix.Optional
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
-            Select New ParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix), Nothing))
+            Select New NormalParameterDeclaration(did, typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix), Nothing)).ToBase
+
+        ExtensionMethodParameterDeclaration.Rule =
+            From prefix In ParamPrefix.Optional
+            From _me In MeKeyword
+            From typesp In TypeSpecifier.Optional()
+            Select New ExtensionParameterDeclaration(typesp, If(prefix IsNot Nothing, New ParameterPrefix(prefix), Nothing)).ToBase
 
         LambdaParameterList.Rule =
            LambdaParameterDeclaration.Many(Comma.AsTerminal().SuffixedBy(LineContinuation))
@@ -654,7 +676,7 @@ Public Class NotBasicParser
         LambdaParameterDeclaration.Rule =
             From did In DeclaringIdentifier
             From typesp In TypeSpecifier.Optional()
-            Select New ParameterDeclaration(did, typesp, Nothing)
+            Select New NormalParameterDeclaration(did, typesp, Nothing).ToBase
 
         TypeSpecifier.Rule =
             From _colon In Colon
@@ -669,7 +691,7 @@ Public Class NotBasicParser
             From typeParams In TypeParameters.Optional
             From _lpth In LeftPth
             From _nl1 In LineContinuation
-            From paramlist In ParameterList
+            From paramlist In MethodParameterList
             From _nl2 In LineContinuation
             From _rpth In RightPth
             From returnTypeSp In TypeSpecifier.Optional()

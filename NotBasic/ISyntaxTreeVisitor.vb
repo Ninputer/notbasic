@@ -38,7 +38,8 @@
     Function Visit(nothingExp As NothingExpression) As T
     Function Visit(operatorDef As OperatorDefinition) As T
     Function Visit(operatorSignature As OperatorSignature) As T
-    Function Visit(paramDecl As ParameterDeclaration) As T
+    Function Visit(normalParamDecl As NormalParameterDeclaration) As T
+    Function Visit(extParamDecl As ExtensionParameterDeclaration) As T
     Function Visit(primitiveTypeName As PrimitiveTypeName) As T
     Function Visit(procedureDecl As ProcedureDeclaration) As T
     Function Visit(qualifiedTypeName As QualifiedTypeName) As T
