@@ -214,7 +214,7 @@ Public Class NotBasicParser
 
             FloatLiteral = .DefineToken((floatLiteralValue >> floatTypeChar.Optional()) Or (intLiteral >> floatTypeChar), "float point literal")
 
-            Dim embeddedExpEndSymbol = Literal("#>")
+            'Dim embeddedExpEndSymbol = Literal("#>")
             Dim doubleQuote = Symbol(""""c)
 
             Dim stringChar = strictStringChar Or lineTerminatorChar

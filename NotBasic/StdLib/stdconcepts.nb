@@ -22,7 +22,7 @@ decl fun GetEnumerator(select me:IEnumerable<T>):IEnumerator<T>
 '    decl fun MoveNext(select e:T)
 'end
 
-decl func Where<T, TE>(me:T, fun(TE)bool predicate): T where Enumerable<T, TE>
+decl fun Where<T, TE>(me:T, predicate:fun(TE)bool ): T where Enumerable<T, TE>
 
 '=====overloadable operators=====
 
