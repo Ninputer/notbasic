@@ -480,7 +480,7 @@ Public Class NotBasicParser
 
         StatementTerminator.Rule =
             From terminator In (LineTerminator.AsTerminal() Or Semicolon.AsTerminal())
-            Select terminator.Value.Span
+            Select If(terminator Is Nothing, Nothing, terminator.Value.Span)
 
         Dim LineContinuation = LineTerminator.Optional()
 

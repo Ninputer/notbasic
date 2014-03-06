@@ -1,28 +1,24 @@
 ﻿Imports VBF.Compilers.Scanners
+Imports VBF.Compilers.Parsers
 
 Public Class KeywordManager
     Private m_lexer As Lexer
-    Private m_reservedKeywords As RegularExpression
+    Private m_reservedKeywords As List(Of Token)
 
     Public Sub New(lexer As Lexer)
         m_lexer = lexer
+        m_reservedKeywords = New List(Of Token)
     End Sub
 
-    Public ReadOnly Property ReservedKeywords As RegularExpression
-        Get
-            Return m_reservedKeywords
-        End Get
-    End Property
+    Public Function CreateReservedKeywordsProduction() As ProductionBase(Of Lexeme)
+        Return Grammar.Union(m_reservedKeywords.ToArray())
+    End Function
 
     Public Function DefineKeyword(keyword As String) As Token
         Dim keywordLiteral = RegularExpression.Literal(keyword)
         Dim token = m_lexer.DefineToken(keywordLiteral, keyword)
 
-        If m_reservedKeywords Is Nothing Then
-            m_reservedKeywords = keywordLiteral
-        Else
-            m_reservedKeywords = m_reservedKeywords Or keywordLiteral
-        End If
+        m_reservedKeywords.Add(token)
 
         Return token
     End Function

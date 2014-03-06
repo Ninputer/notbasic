@@ -3,26 +3,20 @@
 'this file defines the concepts required by the language runtime
 
 '=====required by 'for each' statement=====
-type IEnumerable<T>
+type Enumerable<T>
 
 end
 
-type IEnumerator<T>
+type Enumerator<T>
 
 end
 
-decl fun GetEnumerator(select me:IEnumerable<T>):IEnumerator<T>
+decl fun GetEnumerator<T>(select me:Enumerable<T>):Enumerator<T>
 
-'concept Enumerable<T, TElement, TEnumerator> where Enumerator<TEnumerator, TElement>
-'    decl fun GetEnumerator(select obj:T): TEnumerator
-'end
+decl fun Current<T>(select e:Enumerator<T>):T
+decl fun MoveNext(select e:Enumerator<T>)
 
-'concept Enumerator<T, TElement>
-'    decl fun Current(select e:T):TElement
-'    decl fun MoveNext(select e:T)
-'end
-
-decl fun Where<T, TE>(me:T, predicate:fun(TE)bool): T where Enumerable<T, TE>
+decl fun Where<T>(me:Enumerable<T>, predicate:fun(T)bool): Enumerable<T> 
 
 '=====overloadable operators=====
 

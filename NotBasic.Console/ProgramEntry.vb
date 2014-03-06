@@ -163,7 +163,7 @@ fun SelectCaseStatement()
 end
 
 fun ArrayLiteral()
-    a = []
+    a = [] 'empty array
     b = [1]
     c = ["x","y","z"]
 end
@@ -236,23 +236,24 @@ end
         Dim code2 = <![CDATA['dispatch method
 end
 ]]>
-        Dim s = parser.Parse(code.Value)
+        Dim el1 = em.CreateErrorList()
+        Dim s = parser.Parse(code.Value, el1)
 
         System.Console.WriteLine("Scanner creation time: {0}ms", parser.ScannerCreationTime)
         System.Console.WriteLine("Parser creation time: {0}ms", parser.ParserCreationTime)
 
-        ReportErrors(em)
+        ReportErrors(el1)
 
-        If em.Errors.Count = 0 Then
+        If el1.Count = 0 Then
             Dim dump = s.ToString()
             'System.Console.WriteLine(dump)
         End If
 
+        Dim el2 = em.CreateErrorList()
         Using sr As New StreamReader("StdLib\stdconcepts.nb")
-            em.ClearErrors()
 
-            Dim ast = parser.Parse(sr)
-            ReportErrors(em)
+            Dim ast = parser.Parse(sr, el2)
+            ReportErrors(el2)
 
             Dim astStr = ast.ToString()
 
@@ -260,11 +261,11 @@ end
         End Using
     End Sub
 
-    Sub ReportErrors(errorManager As CompilationErrorManager)
+    Sub ReportErrors(errorList As CompilationErrorList)
 
-        If (errorManager.Errors.Count > 0) Then
+        If (errorList.Count > 0) Then
 
-            For Each er In errorManager.Errors.OrderBy(Function(e) e.ErrorPosition.StartLocation.CharIndex)
+            For Each er In errorList.OrderBy(Function(e) e.ErrorPosition.StartLocation.CharIndex)
                 System.Console.WriteLine(er.ToString())
             Next
         End If
