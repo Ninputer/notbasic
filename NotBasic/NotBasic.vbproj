@@ -15,6 +15,8 @@
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -55,16 +57,17 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="VBF.Compilers.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="VBF.Compilers.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\GitRoot\VBF\bin\VBF.Compilers.Common.dll</HintPath>
+      <HintPath>..\packages\VBF.Compilers.Common.1.0.1\lib\VBF.Compilers.Common.dll</HintPath>
     </Reference>
-    <Reference Include="VBF.Compilers.Parsers">
-      <HintPath>..\..\VBF\bin\VBF.Compilers.Parsers.dll</HintPath>
-    </Reference>
-    <Reference Include="VBF.Compilers.Scanners, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="VBF.Compilers.Parsers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\GitRoot\VBF\bin\VBF.Compilers.Scanners.dll</HintPath>
+      <HintPath>..\packages\VBF.Compilers.Parsers.1.0.0\lib\VBF.Compilers.Parsers.dll</HintPath>
+    </Reference>
+    <Reference Include="VBF.Compilers.Scanners, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\VBF.Compilers.Scanners.1.0.1\lib\VBF.Compilers.Scanners.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -157,11 +160,19 @@
     <Compile Include="Ast\NothingExpression.vb" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="StdLib\stdconcepts.nb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
