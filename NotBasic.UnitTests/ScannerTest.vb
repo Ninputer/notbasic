@@ -10,7 +10,9 @@ Public Class ScannerTest
 
     <SetUp>
     Public Sub Setup()
-        errorManager.ClearErrors()
+        Dim errorCol = errorManager.CreateErrorList()
+
+
     End Sub
 
     <Test>
