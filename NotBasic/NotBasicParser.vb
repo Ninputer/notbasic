@@ -151,14 +151,14 @@ Public Class NotBasicParser
             ChrW(&HD), ChrW(&HA), ChrW(&H85), ChrW(&H2028), ChrW(&H2029)
         }
 
-        Dim letterChar As RegularExpression
-        Dim combiningChar As RegularExpression
-        Dim decimalDigitChar As RegularExpression
-        Dim connectingChar As RegularExpression
-        Dim formattingChar As RegularExpression
-        Dim spaceChar As RegularExpression
-        Dim inputChar As RegularExpression
-        Dim strictStringChar As RegularExpression
+        Dim letterChar As RegularExpression = Nothing
+        Dim combiningChar As RegularExpression = Nothing
+        Dim decimalDigitChar As RegularExpression = Nothing
+        Dim connectingChar As RegularExpression = Nothing
+        Dim formattingChar As RegularExpression = Nothing
+        Dim spaceChar As RegularExpression = Nothing
+        Dim inputChar As RegularExpression = Nothing
+        Dim strictStringChar As RegularExpression = Nothing
 
         Dim charSetBuilder As New CharSetExpressionBuilder()
 
@@ -181,8 +181,8 @@ Public Class NotBasicParser
             Dim identifierStartChar = letterChar Or Symbol("_"c)
             Dim identifierPartChar = letterChar Or decimalDigitChar Or connectingChar Or combiningChar Or formattingChar
 
-            Identifier = .DefineToken(identifierStartChar >> identifierPartChar.Many(), "identifier")
-            EscapedIdentifier = .DefineToken(Symbol("$"c) >> identifierStartChar >> identifierPartChar.Many(), "identifier")
+            Identifier = .DefineToken(identifierStartChar & identifierPartChar.Many(), "identifier")
+            EscapedIdentifier = .DefineToken(Symbol("$"c) & identifierStartChar & identifierPartChar.Many(), "identifier")
         End With
 
         '========== define literals ========== 
@@ -193,15 +193,15 @@ Public Class NotBasicParser
             Dim octalDigit = CharSet("01234567")
 
             Dim intLiteral = digit.Many1()
-            Dim hexLiteral = Literal("&H") >> hexDigit.Many1()
-            Dim octalLiteral = Literal("&O") >> octalDigit.Many1()
+            Dim hexLiteral = Literal("&H") & hexDigit.Many1()
+            Dim octalLiteral = Literal("&O") & octalDigit.Many1()
 
             Dim shortChar = CharSet("sS")
             Dim longChar = CharSet("lL")
 
             Dim integralTypeChar = shortChar Or longChar
             Dim integralLiteralValue = intLiteral Or hexLiteral Or octalLiteral
-            IntegerLiteral = .DefineToken(integralLiteralValue >> integralTypeChar.Optional(), "integral literal")
+            IntegerLiteral = .DefineToken(integralLiteralValue & integralTypeChar.Optional(), "integral literal")
 
             Dim singleChar = CharSet("fF")
             Dim doubleChar = CharSet("rR")
@@ -209,12 +209,12 @@ Public Class NotBasicParser
             Dim floatTypeChar = singleChar Or doubleChar
 
             Dim sign = CharSet("+-")
-            Dim exponent = CharSet("eE") >> sign >> intLiteral
-            Dim floatLiteralValue = (intLiteral >> Symbol("."c) >> intLiteral >> exponent.Optional()) Or
-                (Symbol("."c) >> intLiteral >> exponent.Optional()) Or
-                (intLiteral >> exponent)
+            Dim exponent = CharSet("eE") & sign & intLiteral
+            Dim floatLiteralValue = (intLiteral & Symbol("."c) & intLiteral & exponent.Optional()) Or
+                (Symbol("."c) & intLiteral & exponent.Optional()) Or
+                (intLiteral & exponent)
 
-            FloatLiteral = .DefineToken((floatLiteralValue >> floatTypeChar.Optional()) Or (intLiteral >> floatTypeChar), "float point literal")
+            FloatLiteral = .DefineToken((floatLiteralValue & floatTypeChar.Optional()) Or (intLiteral & floatTypeChar), "float point literal")
 
             'Dim embeddedExpEndSymbol = Literal("#>")
             Dim doubleQuote = Symbol(""""c)
@@ -222,13 +222,13 @@ Public Class NotBasicParser
             Dim stringChar = strictStringChar Or lineTerminatorChar
 
             RawStringLiteral = .DefineToken(
-                doubleQuote >> stringChar.Many() >> doubleQuote,
+                doubleQuote & stringChar.Many() & doubleQuote,
                 "string literal")
 
 
             Dim charChar = CharSet("cC")
-            Dim textCharLiteral = doubleQuote >> strictStringChar >> doubleQuote >> charChar
-            Dim unicodeCharLiteral = Literal("&U+") >> hexDigit.Many1()
+            Dim textCharLiteral = doubleQuote & strictStringChar & doubleQuote & charChar
+            Dim unicodeCharLiteral = Literal("&U+") & hexDigit.Many1()
 
             CharLiteral = .DefineToken(textCharLiteral Or unicodeCharLiteral, "char literal")
         End With
@@ -265,7 +265,7 @@ Public Class NotBasicParser
         '========== define trivias ========== 
         With identifierLexer
             WhiteSpace = .DefineToken(whitespaceChar.Many1(), "white space")
-            Comment = .DefineToken((Symbol("'"c) >> inputChar.Many()), "comment")
+            Comment = .DefineToken((Symbol("'"c) & inputChar.Many()), "comment")
         End With
 
         '========== Define reserved keywords ========== 
