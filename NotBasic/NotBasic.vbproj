@@ -58,15 +58,15 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="VBF.Compilers.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
-      <HintPath>..\packages\VBF.Compilers.Common.1.0.3\lib\Net45\VBF.Compilers.Common.dll</HintPath>
+      <HintPath>..\packages\VBF.Compilers.Common.1.0.5\lib\Net45\VBF.Compilers.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VBF.Compilers.Parsers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
-      <HintPath>..\packages\VBF.Compilers.Parsers.1.0.3\lib\Net45\VBF.Compilers.Parsers.dll</HintPath>
+      <HintPath>..\packages\VBF.Compilers.Parsers.1.0.5\lib\Net45\VBF.Compilers.Parsers.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="VBF.Compilers.Scanners, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f24334f525609297, processorArchitecture=MSIL">
-      <HintPath>..\packages\VBF.Compilers.Scanners.1.0.3\lib\Net45\VBF.Compilers.Scanners.dll</HintPath>
+      <HintPath>..\packages\VBF.Compilers.Scanners.1.0.5\lib\Net45\VBF.Compilers.Scanners.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
