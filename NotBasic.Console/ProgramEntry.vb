@@ -18,7 +18,7 @@ fun Bar(f:fun(int)int, g:fun())
     return g()
 end
 
-fun Sub(s:fun()#):#
+fun Sub(s:fun()void):void
     s()
 end
 

@@ -65,7 +65,7 @@ Public Class NotBasicParser
     Private InKeyword As Token
     Private EnumKeyword As Token
     Private MeKeyword As Token
-
+    Private VoidKeyword As Token
     'contextural keywords
     Private GetKeyword As Token
     Private SetKeyword As Token
@@ -322,6 +322,7 @@ Public Class NotBasicParser
             EnumKeyword = .DefineToken(Literal("enum"))
             DeclareKeyword = .DefineToken(Literal("decl"))
             MeKeyword = .DefineToken(Literal("me"))
+            VoidKeyword = .DefineToken(Literal("void"))
         End With
 
         'define contextual keywords for property declaration
@@ -563,7 +564,7 @@ Public Class NotBasicParser
                                               CharKeyword,
                                               StringKeyword,
                                               ObjectKeyword,
-                                              PoundSymbol)
+                                              VoidKeyword)
             Select DirectCast(New PrimitiveTypeName(typeKeyword.Value), TypeName)
 
         'fun(paramType)returnType
